@@ -11,7 +11,6 @@
   :root{
     --bg:#0C0C0C;
     --lime:#DFF841;     /* logo */
-    --lime-soft:#D1FF6D;/* accentwoorden */
     --paper:#F4F4F1;
     --grey:#CACAC8;
   }
@@ -22,32 +21,20 @@
   /* 9:16 stage */
   #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));overflow:hidden;background:var(--bg);container-type:size}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
-  #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 60% at 50% 40%,transparent 45%,rgba(0,0,0,.6) 100%)}
-  #grain{position:absolute;inset:-50%;pointer-events:none;opacity:.09;mix-blend-mode:screen;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+  #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(100% 70% at 50% 55%,transparent 55%,rgba(0,0,0,.45) 100%)}
 
-  /* Topbalk zoals in de carrousel */
-  #top{position:absolute;left:7cqw;right:7cqw;top:5.6cqh;display:flex;align-items:center;justify-content:space-between}
-  #top svg{width:25cqw;height:auto;display:block}
-  #counter{font-weight:800;font-size:2.6cqw;letter-spacing:.12em;color:var(--grey);display:flex;gap:.5em}
-  #counter .num{display:inline-block;height:1.2em;overflow:hidden;line-height:1.2em}
-  #counter .num span{display:block}
-
-  /* Koppen linksonder */
-  .head{position:absolute;left:7cqw;right:7cqw;bottom:17cqh;color:var(--paper);pointer-events:none}
-  .kicker{display:block;overflow:hidden;font-weight:800;font-size:2.7cqw;letter-spacing:.24em;color:var(--lime-soft);text-transform:uppercase;margin-bottom:2.2cqw}
+  /* Koppen per scène */
+  .head{position:absolute;left:0;right:0;top:9cqh;text-align:center;color:var(--paper);pointer-events:none}
+  .kicker{display:block;overflow:hidden;font-weight:800;font-size:2.7cqw;letter-spacing:.3em;color:var(--lime);text-transform:uppercase;margin-bottom:1.8cqw}
   .kicker span,.title span{display:inline-block;will-change:transform}
-  .title{display:block;overflow:hidden;font-family:"Inter Tight","Inter",sans-serif;font-weight:800;font-size:11.2cqw;letter-spacing:-.055em;line-height:.98;padding:0 .08em .1em 0}
-  .title em{font-style:italic;color:var(--lime-soft)}
-  .sub{display:block;overflow:hidden;margin-top:2.6cqw;font-weight:500;font-size:3.7cqw;letter-spacing:-.01em;color:var(--grey)}
+  .title{display:block;overflow:hidden;font-family:"Inter Tight","Inter",sans-serif;font-weight:800;font-size:10cqw;letter-spacing:-.045em;line-height:1.05;padding-bottom:.1em}
+  .title em{font-style:normal;color:var(--lime)}
 
   /* Eindbeeld */
   #endline{position:absolute;left:0;right:0;top:57cqh;text-align:center;font-family:"Inter Tight","Inter",sans-serif;font-weight:800;font-size:6.2cqw;letter-spacing:-.045em;color:var(--paper);overflow:hidden;padding-bottom:.1em}
   #endline span{display:inline-block}
-  #endline em{font-style:italic;color:var(--lime-soft)}
+  #endline em{font-style:normal;color:var(--lime)}
   #endurl{position:absolute;left:0;right:0;bottom:8cqh;text-align:center;font-weight:800;font-size:2.8cqw;letter-spacing:.24em;color:var(--grey)}
-
-  #flash{position:absolute;inset:0;background:var(--lime);opacity:0;pointer-events:none;mix-blend-mode:normal}
 
   #play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3cqw;
     background:rgba(12,12,12,.55);backdrop-filter:blur(5px);cursor:pointer;border:0;font:inherit;color:var(--paper)}
@@ -62,21 +49,14 @@
   <canvas id="gl"></canvas>
   <div id="vignette"></div>
 
-  <div id="top">
-    <svg id="toplogo" viewBox="0 0 1000 142" aria-label="Pagebooster"></svg>
-    <div id="counter"><span class="num"><span>01</span><span>02</span><span>03</span><span>04</span></span><span>/</span><span>04</span></div>
-  </div>
-
-  <div class="head" id="h1"><span class="kicker"><span>Eerlijk is eerlijk</span></span><span class="title"><span>‘Prima’ kost</span></span><span class="title"><span>je <em>klanten.</em></span></span></div>
-  <div class="head" id="h2"><span class="kicker"><span>Ontwerp &amp; bouw</span></span><span class="title"><span>Strak, slim</span></span><span class="title"><span>en <em>snel.</em></span></span></div>
-  <div class="head" id="h3"><span class="kicker"><span>Vindbaarheid</span></span><span class="title"><span>Bovenaan</span></span><span class="title"><span>in <em>Google.</em></span></span></div>
-  <div class="head" id="h4"><span class="kicker"><span>Resultaat</span></span><span class="title"><span>Meer</span></span><span class="title"><span><em>aanvragen.</em></span></span></div>
+  <div class="head" id="h1"><span class="kicker"><span>01 — Ontwerp</span></span><span class="title"><span>Strak <em>ontworpen.</em></span></span></div>
+  <div class="head" id="h2"><span class="kicker"><span>02 — Techniek</span></span><span class="title"><span>Slim <em>gebouwd.</em></span></span></div>
+  <div class="head" id="h3"><span class="kicker"><span>03 — SEO</span></span><span class="title"><span>Bovenaan <em>in Google.</em></span></span></div>
+  <div class="head" id="h4"><span class="kicker"><span>04 — Groei</span></span><span class="title"><span>Meer <em>klanten.</em></span></span></div>
 
   <div id="endline"><span>Websites die <em>werken.</em></span></div>
   <div id="endurl">PAGEBOOSTER.NL</div>
 
-  <div id="grain"></div>
-  <div id="flash"></div>
   <button id="play" aria-label="Afspelen">
     <span class="btn"><svg viewBox="0 0 24 24" fill="#0C0C0C"><path d="M6 4l14 8-14 8z"/></svg></span>
     <small>AFSPELEN MET GELUID</small>
@@ -94,10 +74,6 @@ const DURATION = 7, FPS = 60;
 const css = getComputedStyle(document.documentElement);
 const hex = v => css.getPropertyValue(v).trim();
 const lin = c => new THREE.Color(c).convertSRGBToLinear();
-
-/* ───────────── 2D logo in de topbalk ───────────── */
-const pathD = LOGO.shapes.flatMap(s => [s.o, ...s.h]).map(poly => 'M' + poly.map(p => `${(p[0]*1000).toFixed(1)} ${(p[1]*1000).toFixed(1)}`).join('L') + 'Z').join('');
-document.getElementById('toplogo').innerHTML = `<path fill="${hex('--lime')}" fill-rule="evenodd" d="${pathD}"/>`;
 
 /* ───────────── Three.js basis ───────────── */
 const stage = document.getElementById('stage');
@@ -134,10 +110,6 @@ scene.add(floor);
 /* ───────────── helpers ───────────── */
 const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: lin(color), roughness:0.5, metalness:0.02}, o));
 const M = {
-  crt:    mat('#5c5c50', {roughness:0.85}),
-  crtDk:  mat('#33332d', {roughness:0.9}),
-  key:    mat('#6c6c60', {roughness:0.8}),
-  bezel:  mat('#1c1c19', {roughness:0.6}),
   paper:  mat(hex('--paper'), {roughness:0.65}),
   paper2: mat('#E2E2DC', {roughness:0.7}),
   line:   mat('#C9C9C3', {roughness:0.8}),
@@ -174,55 +146,9 @@ function rbox(w, h, d, r, material, {pivot = 'center'} = {}){
 }
 const place = (m, x, y, z, parent) => { m.position.set(x, y, z); parent.add(m); return m; };
 
-/* ───────────── Scène 1: de ‘prima’ website – een oude CRT ───────────── */
+/* ───────────── Scène 1 + 2: de website ───────────── */
 const S1 = new THREE.Group(); scene.add(S1);
-const crt = new THREE.Group(); S1.add(crt);
-place(rbox(2.5, 0.34, 2.2, 0.06, M.crt), 0, -1.27, 0, crt);                         // basiskast
-place(rbox(2.2, 1.95, 1.9, 0.1, M.crt), 0, -0.1, -0.15, crt);                      // monitor
-place(rbox(2.0, 1.4, 0.08, 0.06, M.bezel), 0, 0.12, 0.82, crt);                    // bezel
-const screenCanvas = document.createElement('canvas'); screenCanvas.width = 160; screenCanvas.height = 120;
-const sctx = screenCanvas.getContext('2d'), simg = sctx.createImageData(160, 120);
-const screenTex = new THREE.CanvasTexture(screenCanvas);
-screenTex.encoding = THREE.sRGBEncoding;
-const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.78, 1.2), new THREE.MeshBasicMaterial({map:screenTex, toneMapped:false}));
-place(screen, 0, 0.12, 0.87, crt);
-const screenGlow = new THREE.PointLight(0xe9ecdf, 0.9, 5, 2); place(screenGlow, 0, 0.12, 1.6, crt);
-for (let i = 0; i < 6; i++) place(rbox(0.9, 0.022, 0.03, 0.01, M.crtDk), -0.42, -0.72 + i*0.055, 0.8, crt);  // ventilatie
-for (let i = 0; i < 4; i++) place(rbox(0.018, 0.2, 0.03, 0.008, M.crtDk), 0.25 + i*0.045, -0.58, 0.8, crt);
-place(rbox(0.16, 0.16, 0.04, 0.02, M.bezel), 0.62, -0.58, 0.8, crt);
-const power = place(rbox(0.09, 0.09, 0.05, 0.015, M.lime), 0.62, -0.58, 0.83, crt);  // de enige limekleur: het knopje
-place(rbox(2.4, 0.16, 0.95, 0.05, M.crt), 0, -1.2, 1.45, crt).rotation.x = 0.06;    // toetsenbordplaat
-const keys = new THREE.InstancedMesh(new THREE.BoxGeometry(0.15, 0.06, 0.15), M.key, 52);
-keys.castShadow = true;
-{ const d = new THREE.Object3D(); let k = 0;
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 13; c++){ d.position.set(-0.96 + c*0.16, -1.08 + r*0.012, 1.15 + r*0.18); d.rotation.x = 0.06; d.updateMatrix(); keys.setMatrixAt(k++, d.matrix); } }
-crt.add(keys);
-const scr = {glow:0.85, lime:0};
-let seed = 1;
-const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-const L = new THREE.Color(hex('--lime'));
-function drawScreen(frame){
-  seed = 1 + frame * 7919;
-  const d = simg.data;
-  for (let y = 0; y < 120; y++){
-    const scan = y % 2 ? 0.78 : 1;
-    for (let x = 0; x < 160; x++){
-      const v = (0.55 + rnd()*0.45) * scr.glow * scan, i = (y*160 + x)*4;
-      d[i]   = Math.min(255, 255*v*((1 - scr.lime) * 0.93 + scr.lime*L.r));
-      d[i+1] = Math.min(255, 255*v*((1 - scr.lime) * 0.94 + scr.lime*L.g));
-      d[i+2] = Math.min(255, 255*v*((1 - scr.lime) * 0.9  + scr.lime*L.b));
-      d[i+3] = 255;
-    }
-  }
-  sctx.putImageData(simg, 0, 0);
-  screenTex.needsUpdate = true;
-  screenGlow.color.setRGB(0.9 + scr.lime*(L.r - 0.9), 0.92 + scr.lime*(L.g - 0.92), 0.86 + scr.lime*(L.b - 0.86));
-  screenGlow.intensity = 0.9 * scr.glow;
-}
-
-/* ───────────── Scène 2: de nieuwe website (zelfde plek, ‘achter’ het scherm) ───────────── */
-const S2 = new THREE.Group(); S2.visible = false; scene.add(S2);
-const page = new THREE.Group(); page.position.y = 0.1; page.scale.setScalar(0.62); S2.add(page);
+const page = new THREE.Group(); page.scale.setScalar(0.8); S1.add(page);
 const pageBase = rbox(2.7, 4.4, 0.14, 0.16, M.paper); page.add(pageBase);
 const els = [];
 function el(mesh, x, y, layer){ mesh.position.set(x, y, 0.1); mesh.userData = {layer}; page.add(mesh); els.push(mesh); return mesh; }
@@ -246,7 +172,7 @@ el(rbox(0.6, 0.07, 0.05, 0.035, M.lime), -0.68, -1.8, 2);
 
 /* ───────────── Scène 3: Google ───────────── */
 const S3X = 12;
-const S3 = new THREE.Group(); S3.position.set(S3X, 0.15, 0); S3.scale.setScalar(0.7); scene.add(S3);
+const S3 = new THREE.Group(); S3.position.set(S3X, 0.15, 0); S3.scale.setScalar(0.8); scene.add(S3);
 const search = new THREE.Group(); search.position.set(0, 1.95, 0); S3.add(search);
 search.add(rbox(2.8, 0.44, 0.14, 0.22, M.card2));
 const lens = new THREE.Group(); lens.position.set(-1.12, 0, 0.1);
@@ -280,7 +206,7 @@ const ours = results[4];
 
 /* ───────────── Scène 4: groei ───────────── */
 const S4X = 24;
-const S4 = new THREE.Group(); S4.position.set(S4X, 0.1, 0); S4.scale.setScalar(0.85); scene.add(S4);
+const S4 = new THREE.Group(); S4.position.set(S4X, 0.1, 0); S4.scale.setScalar(0.95); scene.add(S4);
 place(rbox(3.0, 1.3, 0.12, 0.14, M.card), 0, -1.66, 0, S4).rotation.x = -Math.PI/2;
 const heights = [0.7, 1.15, 1.65, 2.25, 3.05], barMats = [M.g1, M.g2, M.g3, M.g4, M.paper];
 const bars = heights.map((h, i) => { const b = rbox(0.38, h, 0.38, 0.06, barMats[i], {pivot:'bottom'}); b.position.set(-1.0 + i*0.5, -1.6, 0); b.scale.y = 0.001; S4.add(b); return b; });
@@ -318,8 +244,8 @@ const glowTex = (() => { const c = document.createElement('canvas'); c.width = c
 const glow = new THREE.Mesh(new THREE.PlaneGeometry(9, 4.5), new THREE.MeshBasicMaterial({map:glowTex, transparent:true, depthWrite:false, opacity:0, toneMapped:false}));
 glow.position.set(0, 0, -0.6); S5.add(glow);
 
-/* ───────────── camera-rig (met lens-shift zodat de content boven de koppen valt) ───────────── */
-const cam = {x:-2.6, y:1.4, z:9.5, tx:0, ty:-0.1, tz:0, roll:0, shift:0.13};
+/* ───────────── camera-rig (lens-shift houdt de content onder de koppen) ───────────── */
+const cam = {x:-0.6, y:0.9, z:13.5, tx:0, ty:0, tz:0, roll:0, shift:-0.07};
 let vw = 1, vh = 1;
 function applyCamera(){
   camera.position.set(cam.x, cam.y, cam.z);
@@ -360,23 +286,6 @@ const SFX = {
     if (AC.createStereoPanner){ const p = AC.createStereoPanner(); p.pan.setValueAtTime(-0.4, t); p.pan.linearRampToValueAtTime(0.4, t + dur); g.connect(p); send(p); } else send(g);
     src.start(t); src.stop(t + dur + 0.1);
   },
-  static(dur = 1.3, vol = 0.045){            // CRT-ruis + brom
-    if (!live()) return; const t = AC.currentTime;
-    const src = AC.createBufferSource(); src.buffer = noiseBuf(dur);
-    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
-    const g = AC.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.15); g.gain.setValueAtTime(vol, t + dur - 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(hp); hp.connect(g); g.connect(out); src.start(t);
-    const o = AC.createOscillator(); o.frequency.value = 50; const og = AC.createGain();
-    og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.05, t + 0.2); og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(og); og.connect(out); o.start(t); o.stop(t + dur);
-  },
-  zap(vol = 0.12){                            // ‘power-on’ van de nieuwe site
-    if (!live()) return; const t = AC.currentTime;
-    const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(1800, t + 0.28);
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(600, t); lp.frequency.exponentialRampToValueAtTime(5000, t + 0.28);
-    const g = AC.createGain(); env(g, t, vol, 0.2, 0.15);
-    o.connect(lp); lp.connect(g); send(g); o.start(t); o.stop(t + 0.4);
-  },
   tick(freq = 1400, vol = 0.06){
     if (!live()) return; const t = AC.currentTime;
     const o = AC.createOscillator(); o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq*0.6, t + 0.06);
@@ -414,53 +323,40 @@ const ZERO = {x:0.001, y:0.001, z:0.001}, ONE = {x:1, y:1, z:1};
 
 function headIn(id, t){
   tl.fromTo(`${id} .kicker span`, {yPercent:110}, {yPercent:0, duration:0.4, ease:'expo.out'}, t)
-    .fromTo(`${id} .title span`, {yPercent:110}, {yPercent:0, duration:0.55, ease:'expo.out', stagger:0.06}, t + 0.04);
+    .fromTo(`${id} .title span`, {yPercent:110}, {yPercent:0, duration:0.5, ease:'expo.out'}, t + 0.05);
 }
 function headOut(id, t){
   tl.to(`${id} .kicker span, ${id} .title span`, {yPercent:-110, duration:0.28, ease:'power3.in', stagger:0.025}, t);
 }
-const counter = n => tl.to('#counter .num span', {yPercent:-100*n, duration:0.35, ease:'expo.inOut'}, '<');
 gsap.set('.head .kicker span, .head .title span', {yPercent:110});
 gsap.set('#endline span', {yPercent:110});
 gsap.set('#endurl', {opacity:0, letterSpacing:'.6em'});
 
-// — Scène 1 (0 – 1.5): ‘prima’ – een stoffige CRT in het donker
-tl.call(() => SFX.static(1.4), null, 0.02);
-tl.fromTo(cam, {x:-3.4, y:1.8, z:12, tx:0, ty:-0.35, roll:-0.03}, {x:-1.7, y:0.9, z:8.8, ty:-0.3, roll:0, duration:1.3, ease:'power2.out'}, 0);
-tl.fromTo(crt.rotation, {y:0.55}, {y:0.32, duration:1.3, ease:'power2.out'}, 0);
-tl.fromTo(scr, {glow:0.15}, {glow:0.85, duration:0.5, ease:t => Math.min(1, t*1.3) * (0.7 + 0.3*Math.abs(Math.sin(t*37)))}, 0.05);
-tl.fromTo('#top', {opacity:0, y:-12}, {opacity:1, y:0, duration:0.5}, 0.15);
-headIn('#h1', 0.25);
-
-// — overgang: scherm springt op lime, camera duikt erin (1.15 – 1.6)
-tl.to(scr, {lime:1, glow:1.5, duration:0.25, ease:'power2.in'}, 1.12);
-tl.call(() => { SFX.zap(); SFX.whoosh(0.5, 200, 3000, 0.2); }, null, 1.15);
-tl.to(crt.rotation, {y:0, duration:0.42, ease:'power3.in'}, 1.13);
-tl.to(cam, {x:0, y:0.12, z:1.25, tx:0, ty:0.12, tz:0.8, duration:0.45, ease:'power3.in'}, 1.13);
-tl.to(cam, {shift:0, duration:0.4, ease:'power2.in'}, 1.15);
-headOut('#h1', 1.15);
-tl.fromTo('#flash', {opacity:0}, {opacity:1, duration:0.07, ease:'none'}, 1.53)
-  .to('#flash', {opacity:0, duration:0.22, ease:'power2.out'}, 1.6);
-tl.set(S1, {visible:false}, 1.58).set(S2, {visible:true}, 1.58);
-
-// — Scène 2 (1.6 – 2.7): de nieuwe site bouwt zich op en klapt open
-tl.set(cam, {x:0.1, y:0.3, z:2.6, tx:0, ty:0.15, tz:0}, 1.58);
-tl.to(cam, {x:1.0, y:0.55, z:8.2, ty:-0.15, shift:0.13, duration:0.6, ease:'expo.out'}, 1.6);
-tl.fromTo(page.rotation, {y:-0.25}, {y:-0.1, duration:0.6, ease:'expo.out'}, 1.6);
+// — Scène 1 (0 – 1.5): pagina vliegt in, elementen klikken op hun plek
+tl.call(() => SFX.whoosh(0.6, 200, 1600, 0.17), null, 0.02);
+tl.fromTo(page.position, {x:-1.2, y:-0.6, z:-5}, {x:0, y:0, z:0, duration:0.9, ease:'expo.out'}, 0)
+  .fromTo(page.rotation, {x:0.5, y:-1.1, z:0.12}, {x:0, y:0.18, z:0, duration:1.0, ease:'expo.out'}, 0)
+  .to(page.rotation, {y:-0.12, duration:0.6, ease:'sine.inOut'}, 0.95);
 els.forEach((m, i) => {
-  const t = 1.66 + i*0.018;
-  tl.fromTo(m.position, {z:1.6 + m.userData.layer*0.5}, {z:0.1, duration:0.4, ease:'back.out(1.5)'}, t)
-    .fromTo(m.scale, ZERO, {...ONE, duration:0.3, ease:'back.out(1.8)'}, t);
-  if (i % 4 === 0) tl.call(() => SFX.tick(1100 + i*40, 0.045), null, t + 0.1);
+  const t = 0.32 + i*0.034;
+  tl.fromTo(m.position, {z:1.8 + m.userData.layer*0.6}, {z:0.1, duration:0.45, ease:'back.out(1.6)'}, t)
+    .fromTo(m.scale, ZERO, {...ONE, duration:0.35, ease:'back.out(1.8)'}, t);
+  if (i % 3 === 0) tl.call(() => SFX.tick(1000 + i*45, 0.045), null, t + 0.12);
 });
-tl.call(() => SFX.whoosh(0.5, 120, 900, 0.17), null, 2.1);
-tl.to(cam, {x:5.4, y:2.4, z:5.9, tx:0, ty:-0.05, tz:0.6, roll:0.03, duration:0.65, ease:'power2.inOut'}, 2.12);
-els.forEach(m => tl.to(m.position, {z:0.1 + m.userData.layer*0.6, duration:0.5, ease:'power3.inOut'}, 2.15 + m.userData.layer*0.03));
-tl.to(pageBase.position, {z:-0.25, duration:0.5, ease:'power3.inOut'}, 2.15);
-headIn('#h2', 1.68); counter(1);
+tl.fromTo(cam, {x:-0.6, y:0.9, z:13.5, tx:0, ty:0, tz:0, roll:-0.05}, {x:0.7, y:0.5, z:9.6, ty:-0.1, roll:0, duration:1.5, ease:'power2.out'}, 0);
+headIn('#h1', 0.3);
+
+// — Scène 2 (1.5 – 2.6): exploded view, camera draait eromheen
+tl.call(() => SFX.whoosh(0.55, 120, 900, 0.18), null, 1.42);
+headOut('#h1', 1.32);
+tl.to(cam, {x:5.6, y:2.4, z:6.0, tx:0, ty:-0.1, tz:0.6, roll:0.03, duration:1.15, ease:'power2.inOut'}, 1.45);
+tl.to(page.rotation, {y:0.05, x:0, duration:1.0, ease:'power2.inOut'}, 1.5);
+els.forEach(m => tl.to(m.position, {z:0.1 + m.userData.layer*0.62, duration:0.7, ease:'power3.inOut'}, 1.55 + m.userData.layer*0.04));
+tl.to(pageBase.position, {z:-0.25, duration:0.7, ease:'power3.inOut'}, 1.55);
+headIn('#h2', 1.62);
 
 // — overgang naar Scène 3 (2.6 – 3.1)
-headOut('#h2', 2.5);
+headOut('#h2', 2.42);
 tl.call(() => SFX.whoosh(0.5, 400, 3200, 0.22), null, 2.6);
 tl.to(cam, {x:S3X + 0.7, y:1.1, z:8.6, tx:S3X, ty:0.25, tz:0, roll:-0.02, duration:0.55, ease:'expo.inOut'}, 2.62);
 
@@ -485,7 +381,7 @@ tl.to(ours.position, {z:0.18, duration:0.25, ease:'back.out(2)'}, 3.84)
   .to(ours.userData.badge.scale, {...ONE, duration:0.35, ease:'back.out(2.4)'}, 3.82)
   .call(() => SFX.pop(), null, 3.84);
 tl.to(cam, {x:S3X - 0.9, y:0.4, z:8.0, ty:0.3, roll:0.02, duration:1.0, ease:'sine.inOut'}, 3.1);
-headIn('#h3', 2.96); counter(2);
+headIn('#h3', 2.96);
 
 // — overgang naar Scène 4 (3.98 – 4.45)
 headOut('#h3', 3.95);
@@ -502,11 +398,10 @@ tl.call(() => SFX.whoosh(0.6, 250, 4200, 0.12), null, 4.62);
 tl.to(arrow, {v:1, duration:0.55, ease:'power2.inOut'}, 4.65);
 tl.to(head.scale, {...ONE, duration:0.3, ease:'back.out(2.5)'}, 5.1);
 tl.to(cam, {x:S4X + 2.3, y:0.5, z:7.6, ty:0.1, duration:1.0, ease:'sine.inOut'}, 4.45);
-headIn('#h4', 4.32); counter(3);
+headIn('#h4', 4.32);
 
 // — overgang naar het logo (5.15 – 5.75)
 headOut('#h4', 5.12);
-tl.to('#top', {opacity:0, y:-12, duration:0.3, ease:'power2.in'}, 5.12);
 tl.call(() => SFX.whoosh(0.7, 150, 3600, 0.24), null, 5.18);
 tl.to(cam, {x:S5X, y:0.2, z:12.5, tx:S5X, ty:0.3, tz:0, roll:0, shift:0.0, duration:0.6, ease:'expo.inOut'}, 5.2);
 
@@ -534,11 +429,7 @@ function resize(){
   vw = r.width; vh = r.height;
 }
 addEventListener('resize', resize); resize();
-const grain = document.getElementById('grain');
 function draw(){
-  const frame = Math.round(tl.time() * FPS);
-  if (S1.visible) drawScreen(frame);
-  grain.style.transform = `translate(${(frame*37) % 100 / 4 - 12}%, ${(frame*53) % 100 / 4 - 12}%)`;
   tubeGeo.setDrawRange(0, Math.floor(arrow.v * tubeCount / 6) * 6);
   applyCamera();
   renderer.render(scene, camera);
