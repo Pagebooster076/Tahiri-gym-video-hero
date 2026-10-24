@@ -163,11 +163,25 @@ const A = new THREE.Group(); scene.add(A);
 const L1 = wordLine(A, [['Wat', INK, 700], ['als', INK, 700], ['je', INK, 700], ['website', INK, 700]], 0.4, 0.45);
 const L2 = wordLine(A, [['klanten', LIME_DEEP, 800, 1800], ['oplevert?', INK, 700]], 0.4, -0.08);
 const klanten = L2[0];
+const underline = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color:lin(LIME_DEEP), toneMapped:false}));
+underline.geometry.translate(0.5, 0, 0);
+const ulW = klanten.userData.w - 0.4*0.3*2;
+underline.position.set(klanten.position.x - ulW/2, klanten.position.y - 0.25, 0.01); underline.scale.set(0.001, 0.05, 1);
+A.add(underline);
 
 /* ───────────── Scène B (donker): zoeken → klik → Pagebooster klimt naar #1 ───────────── */
 const BX = 20;
 const B = new THREE.Group(); B.position.set(BX, 0, 0); B.rotation.set(0.1, -0.3, 0.02); B.scale.setScalar(0.65); scene.add(B);
 const QUERY = 'website laten maken';
+const win = (() => { const w = 1720, h = 2380, c = mkCanvas(w, h), x = c.getContext('2d');
+  rr(x, 4, 4, w - 8, h - 8, 80); x.fillStyle = 'rgba(255,255,255,0.035)'; x.fill();
+  x.lineWidth = 3; x.strokeStyle = 'rgba(255,255,255,0.09)'; x.stroke();
+  x.fillStyle = 'rgba(255,255,255,0.05)'; x.fillRect(4, 150, w - 8, 2);
+  ['rgba(255,255,255,0.22)', 'rgba(255,255,255,0.14)', 'rgba(255,255,255,0.1)'].forEach((col, i) => { x.fillStyle = col; x.beginPath(); x.arc(90 + i*62, 78, 19, 0, Math.PI*2); x.fill(); });
+  rr(x, 560, 46, 600, 64, 32); x.fillStyle = 'rgba(255,255,255,0.06)'; x.fill();
+  setFont(x, 34, 500, MONO, 0); x.fillStyle = 'rgba(244,244,241,0.45)'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('google.nl', 860, 80);
+  return plane(c, 450); })();
+win.position.set(0, -0.32, -0.14); B.add(win);
 const searchUI = live(1500, 330, 450, (ctx, {n, caret}, w, h) => {
   rr(ctx, 6, 6, w - 12, h - 12, (h - 12)/2);
   ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill();
@@ -220,7 +234,7 @@ const ours = results[3];
 /* ───────────── Scène C (licht): meer aanvragen ───────────── */
 const CX = 40;
 const C = new THREE.Group(); C.position.set(CX, 0, 0); scene.add(C);
-const H3 = wordLine(C, [['Meer', INK, 700], ['aanvragen.', LIME_DEEP, 800]], 0.46, 2.0);
+const H3 = wordLine(C, [['Meer', INK, 700], ['aanvragen.', LIME_DEEP, 800]], 0.42, 2.0);
 const SERIES = [0.16, 0.22, 0.19, 0.3, 0.27, 0.41, 0.5, 0.46, 0.64, 0.77, 0.94];
 const card = live(1240, 1080, 440, (ctx, {v, p}, w, h) => {
   const P = 40;
@@ -278,7 +292,7 @@ const dotMat = new THREE.ShaderMaterial({
     float r = length(cc);
     float wave = exp(-pow((r - uWave*6.0) / 0.32, 2.0)) * (1.0 - uWave*0.6);
     float ring = exp(-pow((length(cc*vec2(0.82, 1.9)) - 1.38) / 0.11, 2.0)) * uRing;
-    float base = 0.075 * (1.0 - smoothstep(1.2, 4.5, r));
+    float base = 0.055 * (1.0 - smoothstep(1.2, 4.0, r));
     float lit = clamp(wave + ring*0.85, 0.0, 1.0);
     vec3 col = mix(vec3(base*1.6), vec3(0.874, 0.973, 0.255), lit);
     gl_FragColor = vec4(col, dot * clamp(base*9.0 + lit, 0.0, 1.0));
@@ -323,7 +337,7 @@ const mkRT = (w, h, depth) => {
   if (depth){ rt.depthTexture = new THREE.DepthTexture(w, h); rt.depthTexture.type = THREE.UnsignedIntType; }
   return rt;
 };
-let rtBase, rtDof, rtH1, rtH2, rtQ1, rtQ2, rtB1, rtB2, rtC1, rtC2;
+let rtBase, rtDof, rtH1, rtH2, rtQ1, rtQ2, rtB1, rtB2, rtC1, rtC2, rtK1, rtK2;
 const copyMat = new THREE.ShaderMaterial({vertexShader:VS, uniforms:{t:{value:null}}, fragmentShader:'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(t, vUv).rgb, 1.); }'});
 const blurMat = new THREE.ShaderMaterial({vertexShader:VS, uniforms:{t:{value:null}, dir:{value:new THREE.Vector2()}}, fragmentShader:`
   uniform sampler2D t; uniform vec2 dir; varying vec2 vUv;
@@ -336,14 +350,28 @@ const brightMat = new THREE.ShaderMaterial({vertexShader:VS, uniforms:{t:{value:
   void main(){ vec3 c = texture2D(t, vUv).rgb; float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
     float sat = mx > 0.0 ? (mx - mn) / mx : 0.0;
     gl_FragColor = vec4(c * smoothstep(0.6, 0.95, mx) * sat*sat, 1.); }`});
-const dofMat = new THREE.ShaderMaterial({vertexShader:VS,
-  uniforms:{tS:{value:null}, tH:{value:null}, tQ:{value:null}, tD:{value:null}, uNear:{value:camera.near}, uFar:{value:camera.far}, uFocus:{value:8}, uRange:{value:0.28}},
+// coc van wat vóór het focusvlak ligt: wordt uitgesmeerd zodat onscherpe voorgrond over zijn randen mag lopen
+const cocMat = new THREE.ShaderMaterial({vertexShader:VS,
+  uniforms:{tD:{value:null}, uNear:{value:camera.near}, uFar:{value:camera.far}, uFocus:{value:8}, uRange:{value:0.28}},
   fragmentShader:`
-  uniform sampler2D tS, tH, tQ, tD; uniform float uNear, uFar, uFocus, uRange; varying vec2 vUv;
+  uniform sampler2D tD; uniform float uNear, uFar, uFocus, uRange; varying vec2 vUv;
   void main(){
-    float z = texture2D(tD, vUv).x * 2.0 - 1.0;
+    float d = texture2D(tD, vUv).x;
+    float z = d * 2.0 - 1.0, vz = 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear));
+    float fg = d < 0.99999 && vz < uFocus ? clamp((uFocus - vz) / (uFocus * uRange), 0.0, 1.0) : 0.0;
+    gl_FragColor = vec4(fg, 0.0, 0.0, 1.0);
+  }`});
+const dofMat = new THREE.ShaderMaterial({vertexShader:VS,
+  uniforms:{tS:{value:null}, tH:{value:null}, tQ:{value:null}, tD:{value:null}, tK:{value:null}, uNear:{value:camera.near}, uFar:{value:camera.far}, uFocus:{value:8}, uRange:{value:0.28}},
+  fragmentShader:`
+  uniform sampler2D tS, tH, tQ, tD, tK; uniform float uNear, uFar, uFocus, uRange; varying vec2 vUv;
+  void main(){
+    float d = texture2D(tD, vUv).x;
+    float z = d * 2.0 - 1.0;
     float vz = 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear));
-    float coc = clamp(abs(vz - uFocus) / (uFocus * uRange), 0.0, 1.0);
+    // achtergrond-shader (d = 1) is al zacht: geen eigen blur, dus geen halo's rond scherpe tekst
+    float self = d < 0.99999 ? clamp(abs(vz - uFocus) / (uFocus * uRange), 0.0, 1.0) : 0.0;
+    float coc = max(self, clamp(texture2D(tK, vUv).r * 1.4, 0.0, 1.0));
     vec3 s = texture2D(tS, vUv).rgb, h = texture2D(tH, vUv).rgb, q = texture2D(tQ, vUv).rgb;
     gl_FragColor = vec4(coc < 0.5 ? mix(s, h, coc*2.0) : mix(h, q, coc*2.0 - 1.0), 1.0);
   }`});
@@ -391,82 +419,88 @@ function applyCamera(time){
   camera.lookAt(tgt);
 }
 
-/* ───────────── geluid (Web Audio, gesynthetiseerd) ───────────── */
-let AC = null, out = null, verb = null, seeking = false;
-function initAudio(){
-  if (AC) return;
-  AC = new (window.AudioContext || window.webkitAudioContext)();
-  out = AC.createGain(); out.gain.value = 0.6;
-  const comp = AC.createDynamicsCompressor(); out.connect(comp); comp.connect(AC.destination);
-  verb = AC.createConvolver();
-  const len = AC.sampleRate * 2.2, ir = AC.createBuffer(2, len, AC.sampleRate);
+/* ───────────── geluid: muziekbed (129 BPM) + effecten, live én offline te renderen ───────────── */
+const BEAT = 60/129, CUES = [];
+const cue = (t, name, ...args) => CUES.push([t, name, ...args]);
+let seeking = false;
+function buildAudio(ctx){
+  const out = ctx.createGain(); out.gain.value = 1.25;
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.knee.value = 8; comp.ratio.value = 3.5; comp.attack.value = 0.004; comp.release.value = 0.18;
+  out.connect(comp); comp.connect(ctx.destination);
+  const verb = ctx.createConvolver();
+  const len = Math.floor(ctx.sampleRate*2.2), ir = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 3.6); }
   verb.buffer = ir;
-  const vg = AC.createGain(); vg.gain.value = 0.28; verb.connect(vg); vg.connect(out);
+  const vg = ctx.createGain(); vg.gain.value = 0.22; verb.connect(vg); vg.connect(out);
+  const nb = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate);
+  { const d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; }
+
+  return function schedule(t0){
+    const bus = ctx.createGain(), wet = ctx.createGain(); bus.connect(out); wet.connect(verb);
+    const dry = n => n.connect(bus), both = n => { n.connect(bus); n.connect(wet); };
+    const env = (g, t, peak, a, r) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + r); };
+    const gain = () => ctx.createGain();
+    const noise = (t, dur, type, f, q) => { const s = ctx.createBufferSource(); s.buffer = nb; const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; if (q) fl.Q.value = q; s.connect(fl); s.start(t, Math.random()*1.5, dur + 0.05); return fl; };
+    const osc = (type, f, t, dur) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.start(t); o.stop(t + dur); return o; };
+    const S = {
+      kick(t, v = 0.2){ const o = osc('sine', 150, t, 0.4); o.frequency.exponentialRampToValueAtTime(45, t + 0.12); const g = gain(); env(g, t, v, 0.003, 0.3); o.connect(g); dry(g);
+        const c = noise(t, 0.02, 'highpass', 3000), cg = gain(); env(cg, t, v*0.22, 0.001, 0.015); c.connect(cg); dry(cg); },
+      hat(t, v = 0.028){ const n = noise(t, 0.06, 'highpass', 8000), g = gain(); env(g, t, v, 0.001, 0.04); n.connect(g); both(g); },
+      bass(t, f, dur){ const o = osc('sawtooth', f, t, dur + 0.05), o2 = osc('sine', f, t, dur + 0.05);
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(420, t); lp.frequency.exponentialRampToValueAtTime(220, t + dur); lp.Q.value = 2;
+        const g = gain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.01); g.gain.setValueAtTime(0.06, t + dur*0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(lp); lp.connect(g); const g2 = gain(); g2.gain.value = 1.5; o2.connect(g2); g2.connect(g); dry(g); },
+      pad(t, freqs, dur, v = 0.026){ const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(650, t); lp.frequency.linearRampToValueAtTime(1500, t + dur);
+        const g = gain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.2); g.gain.setValueAtTime(v, t + dur - 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.5);
+        lp.connect(g); both(g);
+        freqs.forEach(f => [-7, 7].forEach(c => { const o = osc('sawtooth', f, t, dur + 0.6); o.detune.value = c; const og = gain(); og.gain.value = 0.22; o.connect(og); og.connect(lp); })); },
+      whoosh(t, dur, f0, f1, v){ [[1, 1.1], [0.5, 2.4]].forEach(([m, q], k) => {
+        const s = ctx.createBufferSource(); s.buffer = nb; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+        bp.frequency.setValueAtTime(f0*m, t); bp.frequency.exponentialRampToValueAtTime(f1*m, t + dur*0.7);
+        const g = gain(); env(g, t, v*(k ? 0.6 : 1), dur*0.55, dur*0.45); s.connect(bp); bp.connect(g);
+        if (ctx.createStereoPanner){ const p = ctx.createStereoPanner(); p.pan.setValueAtTime(k ? 0.5 : -0.5, t); p.pan.linearRampToValueAtTime(k ? -0.5 : 0.5, t + dur); g.connect(p); both(p); } else both(g);
+        s.start(t, Math.random(), dur + 0.1); }); },
+      word(t){ const n = noise(t, 0.07, 'bandpass', 3200, 1.4), g = gain(); env(g, t, 0.05, 0.003, 0.05); n.connect(g); both(g); },
+      key(t){ const n = noise(t, 0.035, 'highpass', 2400 + Math.random()*1500), g = gain(); env(g, t, 0.045, 0.002, 0.025); n.connect(g); dry(g); },
+      click(t){ [0, 0.07].forEach((d, i) => { const o = osc('square', i ? 1800 : 2600, t + d, 0.05); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4000;
+        const g = gain(); env(g, t + d, 0.045, 0.001, 0.025); o.connect(lp); lp.connect(g); both(g); }); },
+      tick(t, f = 1500, v = 0.03){ const o = osc('sine', f, t, 0.08); o.frequency.exponentialRampToValueAtTime(f*0.6, t + 0.05); const g = gain(); env(g, t, v, 0.002, 0.05); o.connect(g); both(g); },
+      pop(t){ [880, 1318.5].forEach((f, i) => { const o = osc('triangle', f, t + i*0.06, 0.5), g = gain(); env(g, t + i*0.06, 0.09, 0.005, 0.4); o.connect(g); both(g); }); },
+      boom(t, v = 0.14){ const o = osc('sine', 90, t, 0.7); o.frequency.exponentialRampToValueAtTime(38, t + 0.5); const g = gain(); env(g, t, v, 0.01, 0.6); o.connect(g); dry(g); },
+      riser(t, dur, v){ const s = ctx.createBufferSource(); s.buffer = nb; const hp = ctx.createBiquadFilter(); hp.type = 'highpass';
+        hp.frequency.setValueAtTime(800, t); hp.frequency.exponentialRampToValueAtTime(8000, t + dur);
+        const g = gain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + dur*0.97); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.03);
+        s.connect(hp); hp.connect(g); both(g); s.start(t, 0, dur + 0.05); },
+      impact(t){ S.kick(t, 0.4); S.boom(t, 0.3);
+        const n = noise(t, 1.6, 'lowpass', 6000), g = gain(); env(g, t, 0.07, 0.005, 1.4); n.connect(g); both(g);
+        [349.23, 440, 523.25, 698.46, 880, 1046.5].forEach((f, i) => ['sine', 'triangle'].forEach((ty, k) => {
+          const o = osc(ty, f*(k ? 1.003 : 1), t + i*0.035, 2.8), gg = gain(); env(gg, t + i*0.035, k ? 0.018 : 0.045, 0.01, 2.4 - i*0.2); o.connect(gg); both(gg); })); },
+    };
+    // muziek: Dm – Bb – F, kick op de tel, hats op de achtertel, stilte vóór de impact op tel 12
+    const prog = [[73.42, [146.83, 174.61, 220]], [58.27, [116.54, 146.83, 174.61]], [87.31, [174.61, 220, 261.63]]];
+    for (let i = 0; i <= 10; i++){
+      const t = t0 + i*BEAT, bar = prog[Math.min(2, Math.floor(i/4))];
+      S.kick(t, i % 4 === 0 ? 0.22 : 0.16); S.hat(t + BEAT/2); if (i < 10) S.hat(t + BEAT*0.75, 0.011);
+      S.bass(t, bar[0], BEAT*0.85);
+    }
+    prog.forEach(([, ch], k) => S.pad(t0 + k*4*BEAT, ch, 4*BEAT));
+    S.pad(t0 + 12*BEAT, [174.61, 220, 261.63, 349.23], 1.9, 0.03);
+    CUES.forEach(([t, name, ...args]) => S[name](t0 + t, ...args));
+    return {stop(){ bus.disconnect(); wet.disconnect(); }};
+  };
 }
-const ok = () => AC && !tl.paused() && !seeking;
-function noiseBuf(sec){ const b = AC.createBuffer(1, Math.max(1, AC.sampleRate*sec), AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; return b; }
-function env(g, t, peak, a, r){ g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + r); }
-function send(n){ n.connect(out); n.connect(verb); }
-const SFX = {
-  pad(){
-    if (!ok()) return; const t = AC.currentTime;
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.7;
-    lp.frequency.setValueAtTime(300, t); lp.frequency.exponentialRampToValueAtTime(1800, t + 5.6); lp.frequency.exponentialRampToValueAtTime(800, t + 8);
-    const g = AC.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.045, t + 0.8); g.gain.setValueAtTime(0.045, t + 6.6); g.gain.exponentialRampToValueAtTime(0.0001, t + 8.6);
-    lp.connect(g); send(g);
-    [73.42, 146.83, 220, 277.18, 329.63].forEach((f, i) => [-5, 5].forEach(cents => {
-      const o = AC.createOscillator(); o.type = i ? 'triangle' : 'sine'; o.frequency.value = f; o.detune.value = cents;
-      const og = AC.createGain(); og.gain.value = i ? 0.2 : 0.5; o.connect(og); og.connect(lp); o.start(t); o.stop(t + 8.8);
-    }));
-  },
-  pulse(t0 = 0){                                  // zachte kick: geeft ritme
-    if (!ok()) return; const t = AC.currentTime + t0;
-    const o = AC.createOscillator(); o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.18);
-    const g = AC.createGain(); env(g, t, 0.16, 0.004, 0.22); o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.3);
-  },
-  word(){ if (!ok()) return; const t = AC.currentTime;
-    const s = AC.createBufferSource(); s.buffer = noiseBuf(0.08);
-    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = 1.4;
-    const g = AC.createGain(); env(g, t, 0.06, 0.004, 0.06); s.connect(bp); bp.connect(g); send(g); s.start(t); },
-  key(){ if (!ok()) return; const t = AC.currentTime;
-    const s = AC.createBufferSource(); s.buffer = noiseBuf(0.04);
-    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2400 + Math.random()*1500;
-    const g = AC.createGain(); env(g, t, 0.05, 0.002, 0.03); s.connect(hp); hp.connect(g); g.connect(out); s.start(t); },
-  click(){ if (!ok()) return; const t = AC.currentTime;
-    [0, 0.07].forEach((d, i) => { const o = AC.createOscillator(); o.type = 'square'; o.frequency.value = i ? 1800 : 2600;
-      const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4000;
-      const g = AC.createGain(); env(g, t + d, 0.05, 0.001, 0.025); o.connect(lp); lp.connect(g); send(g); o.start(t + d); o.stop(t + d + 0.05); }); },
-  whoosh(dur = 0.45, f0 = 300, f1 = 2400, vol = 0.18){
-    if (!ok()) return; const t = AC.currentTime;
-    [[1, 1.1], [0.5, 2.4]].forEach(([mul, q], k) => {
-      const src = AC.createBufferSource(); src.buffer = noiseBuf(dur + 0.1);
-      const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
-      bp.frequency.setValueAtTime(f0*mul, t); bp.frequency.exponentialRampToValueAtTime(f1*mul, t + dur*0.7);
-      const g = AC.createGain(); env(g, t, vol*(k ? 0.6 : 1), dur*0.55, dur*0.45);
-      src.connect(bp); bp.connect(g);
-      if (AC.createStereoPanner){ const p = AC.createStereoPanner(); p.pan.setValueAtTime(k ? 0.5 : -0.5, t); p.pan.linearRampToValueAtTime(k ? -0.5 : 0.5, t + dur); g.connect(p); send(p); } else send(g);
-      src.start(t); src.stop(t + dur + 0.1);
-    });
-  },
-  pop(vol = 0.1){ if (!ok()) return; const t = AC.currentTime;
-    [880, 1318.5].forEach((f, i) => { const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
-      const g = AC.createGain(); env(g, t + i*0.06, vol, 0.005, 0.4); o.connect(g); send(g); o.start(t + i*0.06); o.stop(t + i*0.06 + 0.5); }); },
-  tick(freq = 1500, vol = 0.03){ if (!ok()) return; const t = AC.currentTime;
-    const o = AC.createOscillator(); o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq*0.6, t + 0.05);
-    const g = AC.createGain(); env(g, t, vol, 0.002, 0.05); o.connect(g); send(g); o.start(t); o.stop(t + 0.08); },
-  riser(dur = 0.5, vol = 0.08){ if (!ok()) return; const t = AC.currentTime;
-    const src = AC.createBufferSource(); src.buffer = noiseBuf(dur + 0.05);
-    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.setValueAtTime(1200, t); hp.frequency.exponentialRampToValueAtTime(7000, t + dur);
-    const g = AC.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur*0.95); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.04);
-    src.connect(hp); hp.connect(g); send(g); src.start(t); src.stop(t + dur + 0.05); },
-  impact(){ if (!ok()) return; const t = AC.currentTime;
-    const o = AC.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.6);
-    const g = AC.createGain(); env(g, t, 0.4, 0.004, 0.85); o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.95);
-    [523.25, 659.25, 783.99, 1046.5, 1567.98, 2093].forEach((f, i) => ['sine', 'triangle'].forEach((type, k) => {
-      const os = AC.createOscillator(); os.type = type; os.frequency.value = f * (k ? 1.003 : 1);
-      const gg = AC.createGain(); env(gg, t + i*0.04, (k ? 0.02 : 0.055), 0.01, 2.2 - i*0.2);
-      os.connect(gg); send(gg); os.start(t + i*0.04); os.stop(t + 2.6); })); },
+// offline render (voor export naar MP4): geeft een WAV als base64
+window.renderAudio = async () => {
+  const sr = 48000, oc = new OfflineAudioContext(2, Math.ceil(sr*(DURATION + 0.6)), sr);
+  buildAudio(oc)(0);
+  const buf = await oc.startRendering(), n = buf.length, L = buf.getChannelData(0), R = buf.getChannelData(1);
+  const dv = new DataView(new ArrayBuffer(44 + n*4)), str = (o, s) => [...s].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); dv.setUint32(4, 36 + n*4, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr*4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); str(36, 'data'); dv.setUint32(40, n*4, true);
+  for (let i = 0; i < n; i++){ dv.setInt16(44 + i*4, Math.max(-1, Math.min(1, L[i]))*32767, true); dv.setInt16(46 + i*4, Math.max(-1, Math.min(1, R[i]))*32767, true); }
+  let bin = ''; const u8 = new Uint8Array(dv.buffer); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
 };
 
 /* ───────────── tijdlijn ───────────── */
@@ -478,20 +512,20 @@ function wordIn(m, t, {dz = 1.6, dy = -0.08, dur = 0.55} = {}){
   const h = m.userData.home;
   tl.fromTo(m.position, {z:h.z + dz, y:h.y + dy}, {z:h.z, y:h.y, duration:dur, ease:'expo.out'}, t)
     .fromTo(m.material, {opacity:0}, {opacity:1, duration:dur*0.6, ease:'power2.out'}, t);
-  tl.call(() => SFX.word(), null, t + 0.02);
+  cue(t + 0.02, 'word');
 }
-[...L1, ...L2, ...H3, ...results, searchUI, btn, askLabel, card, ...chips, tagline, url].forEach(m => m.material.opacity = 0);
+[...L1, ...L2, ...H3, ...results, win, searchUI, btn, askLabel, card, ...chips, tagline, url].forEach(m => m.material.opacity = 0);
 
-tl.call(() => SFX.pad(), null, 0);
 
 // — A (0 – 1.86): woord voor woord, dan vliegt de camera het woord "klanten" in
 L1.forEach((m, i) => wordIn(m, 0.08 + i*0.12));
 L2.forEach((m, i) => wordIn(m, 0.62 + i*0.14, {dz:2.2}));
-[0.08, 0.62].forEach(t => tl.call(() => SFX.pulse(), null, t));
 tl.fromTo(cam, {x:0.12, y:0.15, z:10.8, tx:0, ty:0.1, roll:-0.02}, {x:0, y:0.08, z:8.9, ty:0.08, roll:0, duration:1.25, ease:'power2.out'}, 0);
+tl.to(underline.scale, {x:ulW, duration:0.32, ease:'expo.out'}, 0.98);
+cue(0.98, 'tick', 1900, 0.035);
 tl.to(cam, {x:klanten.position.x + 0.02, y:-0.06, z:0.4, tx:klanten.position.x - 0.03, ty:-0.08, duration:0.6, ease:'power3.in'}, 1.26);
 tl.to(look, {range:0.5, duration:0.4}, 1.26);
-tl.call(() => { SFX.whoosh(0.6, 200, 3800, 0.2); SFX.riser(0.5, 0.06); }, null, 1.3);
+cue(1.3, 'whoosh', 0.6, 200, 3800, 0.2); cue(1.36, 'riser', 0.5, 0.06);
 tl.to(look, {blur:0.8, duration:0.3, ease:'power2.in'}, 1.56);
 tl.to(look, {flash:1, duration:0.14, ease:'power2.in'}, 1.72);
 
@@ -499,36 +533,36 @@ tl.to(look, {flash:1, duration:0.14, ease:'power2.in'}, 1.72);
 tl.set(look, {dark:1, range:0.22}, 1.86);
 tl.set(cam, {x:BX + 0.75, y:0.95, z:2.9, tx:BX + 0.1, ty:0.68, tz:0, roll:0.03}, 1.86);
 tl.to(look, {flash:0, blur:0, duration:0.3, ease:'power2.out'}, 1.86);
-tl.call(() => SFX.pulse(), null, 1.86);
+cue(1.86, 'boom', 0.16);
 tl.to(cam, {x:BX + 0.4, y:0.75, z:5.1, tx:BX + 0.02, ty:0.5, roll:0, duration:0.9, ease:'power2.out'}, 1.86);
-tl.to([searchUI.material, btn.material], {opacity:1, duration:0.3}, 1.86);
+tl.to([searchUI.material, btn.material, win.material], {opacity:1, duration:0.3}, 1.86);
 tl.fromTo(btn.scale, {x:0.4, y:0.4}, {x:1, y:1, duration:0.5, ease:'back.out(2)'}, 1.92);
 tl.to(askLabel.material, {opacity:1, duration:0.4}, 1.95);
 tl.to(typing, {n:QUERY.length, duration:0.58, ease:'none'}, 1.98);
-for (let i = 0; i < QUERY.length; i++) tl.call(() => SFX.key(), null, 1.98 + i*0.58/QUERY.length);
+for (let i = 0; i < QUERY.length; i++) cue(1.98 + i*0.58/QUERY.length, 'key');
 tl.fromTo(cursor.position, {x:1.95, y:-0.55}, {x:btn.position.x + 0.02, y:btn.position.y - 0.04, duration:0.36, ease:'power3.inOut'}, 2.36);
 tl.to(cursor.scale, {x:0.85, y:0.85, duration:0.06, yoyo:true, repeat:1, ease:'power1.inOut'}, 2.74);
 tl.to(btn.scale, {x:0.88, y:0.88, duration:0.07, yoyo:true, repeat:1, ease:'power1.inOut'}, 2.74);
 tl.fromTo(ripple.scale, {x:1, y:1}, {x:2.4, y:2.4, duration:0.45, ease:'expo.out'}, 2.76)
   .fromTo(ripple.material, {opacity:0.9}, {opacity:0, duration:0.45, ease:'power2.out'}, 2.76);
-tl.call(() => SFX.click(), null, 2.74);
+cue(2.74, 'click');
 results.forEach((m, i) => {
   const t = 2.86 + i*0.05;
   tl.fromTo(m.position, {z:-0.7, y:SLOT(i) - 0.25}, {z:0, y:SLOT(i), duration:0.45, ease:'expo.out'}, t)
     .to(m.material, {opacity:1, duration:0.25}, t);
-  tl.call(() => SFX.tick(1500 - i*120), null, t);
+  cue(t, 'tick', 1500 - i*120);
 });
 tl.to(cam, {x:BX + 0.25, y:0.0, z:5.4, tx:BX, ty:-0.25, duration:0.62, ease:'sine.inOut'}, 2.86);
 tl.to(cursor.position, {x:2.4, y:-1.6, duration:0.4, ease:'power2.in'}, 2.9);
-tl.call(() => SFX.whoosh(0.35, 600, 2600, 0.09), null, 3.1);
+cue(3.1, 'whoosh', 0.35, 600, 2600, 0.09);
 tl.to(ours.position, {z:0.45, duration:0.14, ease:'power2.out'}, 3.08)
   .to(ours.position, {y:SLOT(0), duration:0.3, ease:'power3.inOut'}, 3.14)
   .to(ours.position, {z:0.06, duration:0.2, ease:'back.out(2)'}, 3.42);
 results.slice(0, 3).forEach((m, i) => tl.to(m.position, {y:SLOT(i + 1), duration:0.28, ease:'power3.inOut'}, 3.16 + (2 - i)*0.02));
-tl.call(() => SFX.pop(), null, 3.42);
+cue(3.42, 'pop');
 
 // — C (3.5 – 4.95): licht, kaart met groeiende aanvragen
-tl.call(() => { SFX.whoosh(0.4, 300, 3000, 0.17); SFX.pulse(0.12); }, null, 3.48);
+cue(3.48, 'whoosh', 0.4, 300, 3000, 0.17); cue(3.52, 'boom', 0.12);
 tl.to(look, {blur:1, duration:0.12, ease:'power2.in'}, 3.48);
 tl.to(cam, {x:CX + 0.9, y:0.6, z:9.4, tx:CX, ty:0.1, tz:0, roll:-0.02, duration:0.24, ease:'expo.inOut'}, 3.48);
 tl.set(look, {dark:0, range:0.36}, 3.6);
@@ -539,7 +573,7 @@ tl.fromTo(card.rotation, {y:0.7, x:0.2}, {y:-0.12, x:0.04, duration:0.7, ease:'e
   .fromTo(card.position, {z:-1.6}, {z:0, duration:0.7, ease:'expo.out'}, 3.6)
   .to(card.material, {opacity:1, duration:0.3}, 3.6);
 tl.to(counter, {v:214, duration:0.75, ease:'power2.out'}, 3.82).to(counter, {p:1, duration:0.75, ease:'power2.inOut'}, 3.82);
-for (let i = 0; i < 9; i++) tl.call(() => SFX.tick(900 + i*110, 0.025), null, 3.82 + i*0.075);
+for (let i = 0; i < 9; i++) cue(3.82 + i*0.075, 'tick', 900 + i*110, 0.025);
 chips.forEach((m, i) => {
   const h = m.position.clone();
   tl.fromTo(m.position, {y:h.y - 0.35}, {y:h.y, duration:0.6, ease:'expo.out'}, 3.8 + i*0.08)
@@ -547,7 +581,7 @@ chips.forEach((m, i) => {
 });
 
 // — overgang: lime golf vult het beeld (4.78 – 5.02)
-tl.call(() => { SFX.whoosh(0.5, 150, 3600, 0.18); SFX.riser(0.45, 0.07); }, null, 4.76);
+cue(4.76, 'whoosh', 0.5, 150, 3600, 0.18); cue(4.78, 'riser', 0.8, 0.07);
 tl.to(look, {wipe:1, duration:0.24, ease:'power3.in'}, 4.78);
 tl.to(cam, {z:7.6, duration:0.24, ease:'power3.in'}, 4.78);
 
@@ -563,10 +597,11 @@ letters.forEach((m, i) => {
     .fromTo(m.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.35, ease:'power3.out'}, t);
 });
 tl.fromTo(logoG.rotation, {y:-0.18}, {y:0.04, duration:1.9, ease:'power2.out'}, 5.08);
-tl.call(() => SFX.impact(), null, 5.55);
-tl.fromTo(look, {wave:0}, {wave:1, duration:1.3, ease:'power2.out'}, 5.55);
+const IMPACT = BEAT*12;   // ≈ 5.58 s, precies op de tel
+cue(IMPACT, 'impact');
+tl.fromTo(look, {wave:0}, {wave:1, duration:1.3, ease:'power2.out'}, IMPACT);
 tl.to(look, {ring:1, duration:0.6, ease:'power2.out'}, 5.7);
-tl.fromTo(look, {bloom:1}, {bloom:2.0, duration:0.1}, 5.55).to(look, {bloom:1.2, duration:0.9}, 5.65);
+tl.fromTo(look, {bloom:1}, {bloom:2.0, duration:0.1}, IMPACT).to(look, {bloom:1.2, duration:0.9}, IMPACT + 0.1);
 tl.fromTo(sheen.position, {x:EX - 1.8, y:0.4, z:0.9}, {x:EX + 1.8, duration:0.9, ease:'power2.inOut'}, 5.7)
   .fromTo(sheen, {intensity:0}, {intensity:1.6, duration:0.3, yoyo:true, repeat:1, repeatDelay:0.3, ease:'sine.inOut'}, 5.7);
 pixels.forEach((m, i) => tl.to(m.material, {opacity:0.85, duration:0.4}, 5.25 + i*0.03));
@@ -579,10 +614,11 @@ function resize(){
   const r = stage.getBoundingClientRect();
   renderer.setSize(r.width, r.height, false);
   const W = Math.round(r.width*DPR), H = Math.round(r.height*DPR);
-  [rtBase, rtDof, rtH1, rtH2, rtQ1, rtQ2, rtB1, rtB2, rtC1, rtC2].forEach(rt => rt && rt.dispose());
+  [rtBase, rtDof, rtH1, rtH2, rtQ1, rtQ2, rtB1, rtB2, rtC1, rtC2, rtK1, rtK2].forEach(rt => rt && rt.dispose());
   rtBase = mkRT(W, H, true); rtDof = mkRT(W, H);
   rtH1 = mkRT(W >> 1, H >> 1); rtH2 = mkRT(W >> 1, H >> 1); rtQ1 = mkRT(W >> 2, H >> 2); rtQ2 = mkRT(W >> 2, H >> 2);
   rtB1 = mkRT(W >> 1, H >> 1); rtB2 = mkRT(W >> 1, H >> 1); rtC1 = mkRT(W >> 2, H >> 2); rtC2 = mkRT(W >> 2, H >> 2);
+  rtK1 = mkRT(W >> 2, H >> 2); rtK2 = mkRT(W >> 2, H >> 2); rtK1.texture.encoding = rtK2.texture.encoding = THREE.LinearEncoding;
   finalMat.uniforms.uRes.value.set(W, H);
 }
 addEventListener('resize', resize); resize();
@@ -599,9 +635,11 @@ function draw(){
   // scherptediepte
   down(rtBase, rtH1); blur(rtH1, rtH2, 1.2);
   down(rtH1, rtQ1); blur(rtQ1, rtQ2, 1.6); blur(rtQ1, rtQ2, 2.4);
-  const du = dofMat.uniforms;
-  du.tS.value = rtBase.texture; du.tH.value = rtH1.texture; du.tQ.value = rtQ1.texture; du.tD.value = rtBase.depthTexture;
-  du.uFocus.value = camera.position.distanceTo(tgt) + look.focus; du.uRange.value = look.range;
+  const focus = camera.position.distanceTo(tgt) + look.focus, cu = cocMat.uniforms, du = dofMat.uniforms;
+  cu.tD.value = rtBase.depthTexture; cu.uFocus.value = focus; cu.uRange.value = look.range;
+  pass(cocMat, rtK1); blur(rtK1, rtK2, 1.5); blur(rtK1, rtK2, 2.5);
+  du.tS.value = rtBase.texture; du.tH.value = rtH1.texture; du.tQ.value = rtQ1.texture; du.tD.value = rtBase.depthTexture; du.tK.value = rtK1.texture;
+  du.uFocus.value = focus; du.uRange.value = look.range;
   pass(dofMat, rtDof);
   // bloom (alleen in donkere scènes)
   brightMat.uniforms.t.value = rtDof.texture; pass(brightMat, rtB1); blur(rtB1, rtB2, 1.0);
@@ -619,7 +657,14 @@ window.renderFrame = n => { seeking = true; tl.pause(); tl.seek(n / FPS, true); 
 window.TOTAL_FRAMES = DURATION * FPS;
 
 const play = document.getElementById('play');
-function start(){ initAudio(); AC.resume(); play.classList.add('hidden'); tl.restart(); }
+let AC = null, schedule = null, bus = null;
+function start(){
+  if (!AC){ AC = new (window.AudioContext || window.webkitAudioContext)(); schedule = buildAudio(AC); }
+  AC.resume();
+  if (bus) bus.stop();   // opnieuw starten: vorige geluiden direct stil
+  bus = schedule(AC.currentTime + 0.03);
+  play.classList.add('hidden'); tl.restart();
+}
 play.addEventListener('click', start);
 tl.eventCallback('onComplete', () => setTimeout(() => { play.querySelector('small').textContent = 'OPNIEUW AFSPELEN'; play.classList.remove('hidden'); }, 900));
 addEventListener('keydown', e => { if (e.code === 'Space' || e.key === 'r'){ e.preventDefault(); start(); } });
