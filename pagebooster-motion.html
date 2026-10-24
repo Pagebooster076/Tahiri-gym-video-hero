@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagebooster Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ── Merkkleuren: pas hier aan als het officiële logo afwijkt ── */
+  :root{
+    --bg:#F4F6FB;
+    --ink:#0E1A3A;
+    --blue:#1F5BFF;
+    --orange:#FF6B2C;
+    --muted:#8A94AD;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#0b0e16;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+
+  /* 9:16 stage, geschaald op basis van 1080×1920 */
+  #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));overflow:hidden;
+    background:radial-gradient(120% 70% at 50% 35%,#ffffff 0%,var(--bg) 55%,#E6EBF5 100%);
+    container-type:size}
+  #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .u{font-size:calc(100cqw / 1080)} /* 1em-schaal hulp niet nodig; we gebruiken cqw direct */
+
+  /* Koppen per scène */
+  .head{position:absolute;left:0;right:0;top:9.5cqh;text-align:center;color:var(--ink);pointer-events:none}
+  .kicker{display:block;overflow:hidden;font-weight:700;font-size:3.1cqw;letter-spacing:.32em;color:var(--blue);text-transform:uppercase;margin-bottom:1.6cqw}
+  .kicker span,.title span{display:inline-block;will-change:transform}
+  .title{display:block;overflow:hidden;font-weight:800;font-size:9.6cqw;letter-spacing:-.035em;line-height:1.08;padding-bottom:.08em}
+  .title em{font-style:normal;color:var(--orange)}
+
+  /* Footer url */
+  #url{position:absolute;left:0;right:0;bottom:5.2cqh;text-align:center;font-weight:700;font-size:3cqw;letter-spacing:.06em;color:var(--ink);opacity:.55}
+  #url b{color:var(--orange)}
+  #progress{position:absolute;left:50%;bottom:3.4cqh;transform:translateX(-50%);display:flex;gap:1.2cqw}
+  #progress i{display:block;width:7cqw;height:.45cqw;border-radius:1cqw;background:rgba(14,26,58,.12);overflow:hidden}
+  #progress i::after{content:"";display:block;height:100%;width:100%;background:var(--blue);transform:scaleX(var(--p,0));transform-origin:left}
+
+  /* Eindbeeld wordmark */
+  #wordmark{position:absolute;left:0;right:0;top:63cqh;text-align:center;color:var(--ink);font-weight:800;font-size:12.4cqw;letter-spacing:-.045em;line-height:1;white-space:nowrap}
+  #wordmark .ch{display:inline-block;will-change:transform}
+  #wordmark .nl{color:var(--orange)}
+  #tagline{position:absolute;left:0;right:0;top:73.5cqh;text-align:center;color:var(--muted);font-weight:500;font-size:3.6cqw;letter-spacing:.02em}
+  #tagline b{color:var(--ink);font-weight:700}
+
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+
+  /* Start / replay */
+  #play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4cqw;
+    background:rgba(244,246,251,.72);backdrop-filter:blur(6px);cursor:pointer;border:0;font:inherit;color:var(--ink)}
+  #play .btn{width:20cqw;height:20cqw;border-radius:50%;background:var(--blue);display:grid;place-items:center;box-shadow:0 2cqw 6cqw rgba(31,91,255,.35)}
+  #play .btn svg{width:7cqw;height:7cqw;margin-left:1cqw}
+  #play small{font-weight:700;font-size:3.2cqw;letter-spacing:.08em;opacity:.7}
+  #play.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+
+  <div class="head" id="h1"><span class="kicker"><span>01 — Ontwerp</span></span><span class="title"><span>Strak <em>ontworpen.</em></span></span></div>
+  <div class="head" id="h2"><span class="kicker"><span>02 — Techniek</span></span><span class="title"><span>Slim <em>gebouwd.</em></span></span></div>
+  <div class="head" id="h3"><span class="kicker"><span>03 — SEO</span></span><span class="title"><span>Bovenaan <em>in Google.</em></span></span></div>
+  <div class="head" id="h4"><span class="kicker"><span>04 — Groei</span></span><span class="title"><span>Meer <em>klanten.</em></span></span></div>
+
+  <div id="url">pagebooster<b>.nl</b></div>
+  <div id="progress"><i></i><i></i><i></i><i></i></div>
+
+  <div id="wordmark"></div>
+  <div id="tagline">Websites die <b>groeien.</b></div>
+
+  <div id="flash"></div>
+  <button id="play" aria-label="Afspelen">
+    <span class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6 4l14 8-14 8z"/></svg></span>
+    <small>AFSPELEN MET GELUID</small>
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(() => {
+const css = getComputedStyle(document.documentElement);
+const C = {
+  bg:     new THREE.Color(css.getPropertyValue('--bg').trim()),
+  ink:    new THREE.Color(css.getPropertyValue('--ink').trim()),
+  blue:   new THREE.Color(css.getPropertyValue('--blue').trim()),
+  orange: new THREE.Color(css.getPropertyValue('--orange').trim()),
+};
+const DURATION = 7, FPS = 60;
+
+/* ───────────────────────── Three.js basis ───────────────────────── */
+const stage = document.getElementById('stage');
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(new THREE.Color(C.bg).convertSRGBToLinear(), 12, 30);
+const camera = new THREE.PerspectiveCamera(42, 9/16, 0.1, 100);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe5f2, 0.85));
+const key = new THREE.DirectionalLight(0xffffff, 0.75);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.radius = 6;
+key.shadow.bias = -0.0004;
+Object.assign(key.shadow.camera, {left:-6, right:6, top:6, bottom:-6, near:1, far:40});
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0xcfdcff, 0.35);
+rim.position.set(-6, 4, -6);
+scene.add(rim);
+
+// subtiele vloer met grid voor diepte
+const floorY = -3.4;
+const grid = new THREE.GridHelper(120, 120, 0xc9d2e6, 0xdde3f0);
+grid.position.set(18, floorY, 0);
+grid.material.transparent = true; grid.material.opacity = 0.55;
+scene.add(grid);
+const shadowFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 40), new THREE.ShadowMaterial({opacity:0.08}));
+shadowFloor.rotation.x = -Math.PI/2; shadowFloor.position.set(18, floorY + 0.001, 0);
+shadowFloor.receiveShadow = true;
+scene.add(shadowFloor);
+
+/* ───────────────────────── helpers ───────────────────────── */
+const lin = c => new THREE.Color(c).convertSRGBToLinear();
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: lin(color), roughness:0.45, metalness:0.05}, o));
+const M = {
+  white:  mat(0xffffff, {roughness:0.6}),
+  panel:  mat(0xEEF2F9, {roughness:0.7}),
+  line:   mat(0xD5DCEA, {roughness:0.8}),
+  blue:   mat(C.blue, {roughness:0.35}),
+  blueLt: mat(new THREE.Color(C.blue).lerp(new THREE.Color(0xffffff), 0.72), {roughness:0.5}),
+  orange: mat(C.orange, {roughness:0.35}),
+  ink:    mat(C.ink, {roughness:0.4}),
+};
+
+function rrShape(w, h, r){
+  r = Math.min(r, w/2, h/2);
+  const s = new THREE.Shape(), x = -w/2, y = -h/2;
+  s.moveTo(x + r, y);
+  s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  return s;
+}
+function rbox(w, h, d, r, material, {pivot = 'center'} = {}){
+  const bev = Math.min(0.03, d*0.3, r*0.5);
+  const g = new THREE.ExtrudeGeometry(rrShape(w - bev*2, h - bev*2, Math.max(r - bev, 0.001)),
+    {depth: Math.max(d - bev*2, 0.001), bevelEnabled:true, bevelThickness:bev, bevelSize:bev, bevelSegments:3, curveSegments:10});
+  g.center();
+  if (pivot === 'bottom') g.translate(0, h/2, 0);
+  const m = new THREE.Mesh(g, material);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function extrude(shape, depth, material, bev = 0.02){
+  const g = new THREE.ExtrudeGeometry(shape, {depth, bevelEnabled:true, bevelThickness:bev, bevelSize:bev, bevelSegments:3, curveSegments:16});
+  const m = new THREE.Mesh(g, material);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+/* ───────────────────────── Scène 1 + 2: de website ───────────────────────── */
+const S1 = new THREE.Group(); scene.add(S1);
+const page = new THREE.Group(); S1.add(page);
+const pageBase = rbox(2.7, 4.6, 0.14, 0.16, M.white); page.add(pageBase);
+
+// elementen: [mesh, x, y, laag voor exploded view]
+const els = [];
+function el(mesh, x, y, layer){ mesh.position.set(x, y, 0.1); mesh.userData = {x, y, layer}; page.add(mesh); els.push(mesh); return mesh; }
+el(rbox(2.3, 0.2, 0.06, 0.1, M.panel), 0, 2.0, 1);              // nav
+el(rbox(0.2, 0.2, 0.08, 0.06, M.blue), -0.98, 2.0, 2);          // nav logo
+el(rbox(0.56, 0.08, 0.05, 0.04, M.line), 0.78, 2.0, 2);         // nav links
+el(rbox(2.3, 1.25, 0.08, 0.1, M.blue), 0, 1.13, 1);             // hero
+el(rbox(1.4, 0.13, 0.06, 0.06, M.white), -0.32, 1.3, 2);        // hero tekst
+el(rbox(0.95, 0.1, 0.06, 0.05, M.blueLt), -0.55, 1.07, 2);
+el(rbox(0.62, 0.2, 0.08, 0.1, M.orange), -0.72, 0.76, 3);       // hero knop
+el(rbox(1.9, 0.12, 0.05, 0.06, M.line), -0.2, 0.18, 2);         // koptekst
+el(rbox(1.4, 0.12, 0.05, 0.06, M.line), -0.45, -0.02, 2);
+for (let i = 0; i < 3; i++){
+  const x = -0.78 + i*0.78;
+  el(rbox(0.68, 0.98, 0.08, 0.08, M.panel), x, -0.75, 1);       // kaarten
+  el(rbox(0.3, 0.3, 0.07, 0.08, i === 1 ? M.orange : M.blue), x, -0.55, 2);
+  el(rbox(0.46, 0.07, 0.05, 0.035, M.line), x, -0.98, 2);
+}
+el(rbox(2.3, 0.42, 0.06, 0.08, M.panel), 0, -1.78, 1);          // footer
+el(rbox(0.7, 0.08, 0.05, 0.04, M.line), -0.62, -1.78, 2);
+
+/* ───────────────────────── Scène 3: Google ───────────────────────── */
+const S3X = 12;
+const S3 = new THREE.Group(); S3.position.x = S3X; scene.add(S3);
+const search = new THREE.Group(); search.position.set(0, 1.95, 0); S3.add(search);
+search.add(rbox(2.8, 0.44, 0.14, 0.22, M.white));
+const lens = new THREE.Group(); lens.position.set(-1.12, 0, 0.1);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.024, 12, 40), M.blue); ring.position.set(-0.02, 0.02, 0);
+const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.1, 12), M.blue);
+handle.position.set(0.07, -0.07, 0); handle.rotation.z = Math.PI/4;
+lens.add(ring, handle); search.add(lens);
+const typed = rbox(1.2, 0.09, 0.05, 0.045, M.line); typed.position.set(-0.3, 0, 0.09); search.add(typed);
+const caret = rbox(0.02, 0.16, 0.04, 0.01, M.blue); caret.position.set(0.34, 0, 0.09); search.add(caret);
+
+const SLOT = y => 1.15 - y*0.68;
+const results = [];
+function result(highlight){
+  const g = new THREE.Group();
+  const base = rbox(2.8, 0.56, 0.12, 0.1, M.white); g.add(base);
+  const t = rbox(highlight ? 1.3 : 1.15, 0.09, 0.05, 0.045, highlight ? M.blue : M.blueLt); t.position.set(-1.2 + (highlight?1.3:1.15)/2, 0.11, 0.08); g.add(t);
+  const l1 = rbox(2.2, 0.06, 0.04, 0.03, M.line); l1.position.set(-0.1, -0.05, 0.08); g.add(l1);
+  const l2 = rbox(1.5, 0.06, 0.04, 0.03, M.line); l2.position.set(-0.45, -0.17, 0.08); g.add(l2);
+  if (highlight){
+    const stripe = rbox(0.07, 0.4, 0.06, 0.03, M.orange); stripe.position.set(-1.3, 0, 0.08); g.add(stripe);
+    const badge = new THREE.Group(); badge.position.set(1.2, 0.04, 0.12);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.07, 40), M.orange); disc.rotation.x = Math.PI/2; disc.castShadow = true;
+    const star = new THREE.Shape(); // klein vinkje
+    star.moveTo(-0.07, 0.0); star.lineTo(-0.02, -0.05); star.lineTo(0.08, 0.06); star.lineTo(0.06, 0.08); star.lineTo(-0.02, -0.01); star.lineTo(-0.05, 0.02);
+    const tick = extrude(star, 0.02, M.white, 0.005); tick.position.z = 0.04;
+    badge.add(disc, tick); badge.scale.setScalar(0.001); g.add(badge); g.userData.badge = badge;
+  }
+  S3.add(g);
+  return g;
+}
+for (let i = 0; i < 5; i++){ const r = result(i === 4); r.position.set(0, SLOT(i), 0); results.push(r); }
+const hero3 = results[4];
+
+/* ───────────────────────── Scène 4: groei ───────────────────────── */
+const S4X = 24;
+const S4 = new THREE.Group(); S4.position.x = S4X; scene.add(S4);
+const plate = rbox(3.0, 1.3, 0.12, 0.14, M.white); plate.rotation.x = -Math.PI/2; plate.position.set(0, -1.66, 0); S4.add(plate);
+const heights = [0.7, 1.15, 1.65, 2.25, 3.05];
+const bars = heights.map((h, i) => {
+  const b = rbox(0.38, h, 0.38, 0.06, i === 4 ? M.blue : (i === 3 ? M.blueLt : M.panel), {pivot:'bottom'});
+  b.position.set(-1.0 + i*0.5, -1.6, 0); b.scale.y = 0.001; S4.add(b); return b;
+});
+const arrowPts = [new THREE.Vector3(-1.25,-0.9,0.45), new THREE.Vector3(-0.5,-0.35,0.45), new THREE.Vector3(0.05,-0.55,0.45), new THREE.Vector3(0.6,0.35,0.45), new THREE.Vector3(1.15,1.75,0.45)];
+const curve = new THREE.CatmullRomCurve3(arrowPts, false, 'centripetal');
+const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.05, 14, false);
+const tube = new THREE.Mesh(tubeGeo, M.orange); tube.castShadow = true; S4.add(tube);
+const tubeCount = tubeGeo.index.count;
+const arrow = {v:0};
+const head = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.32, 32), M.orange);
+head.castShadow = true;
+const end = curve.getPoint(1), dir = curve.getTangent(1);
+head.position.copy(end).addScaledVector(dir, 0.1);
+head.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+head.scale.setScalar(0.001); S4.add(head);
+
+/* ───────────────────────── Scène 5: logo ───────────────────────── */
+const S5X = 36;
+const S5 = new THREE.Group(); S5.position.x = S5X; scene.add(S5);
+const logo = new THREE.Group(); logo.position.set(0, 0.95, 0); S5.add(logo);
+const tile = rbox(2.0, 2.0, 0.42, 0.46, M.blue); logo.add(tile);
+// pagina met omgevouwen hoek
+const pw = 0.92, ph = 1.18, fold = 0.3;
+const pageShape = new THREE.Shape();
+pageShape.moveTo(-pw/2, -ph/2); pageShape.lineTo(pw/2, -ph/2); pageShape.lineTo(pw/2, ph/2 - fold);
+pageShape.lineTo(pw/2 - fold, ph/2); pageShape.lineTo(-pw/2, ph/2); pageShape.closePath();
+const logoPage = extrude(pageShape, 0.07, M.white, 0.025); logoPage.position.set(-0.08, -0.04, 0.22); logo.add(logoPage);
+const foldShape = new THREE.Shape();
+foldShape.moveTo(pw/2 - fold, ph/2); foldShape.lineTo(pw/2 - fold, ph/2 - fold); foldShape.lineTo(pw/2, ph/2 - fold); foldShape.closePath();
+const logoFold = extrude(foldShape, 0.05, M.blueLt, 0.012); logoFold.position.set(-0.08, -0.04, 0.3); logo.add(logoFold);
+// oranje 'boost'-pijl
+const a = new THREE.Shape();
+a.moveTo(-0.11, -0.34); a.lineTo(0.11, -0.34); a.lineTo(0.11, 0.02); a.lineTo(0.26, 0.02); a.lineTo(0, 0.34); a.lineTo(-0.26, 0.02); a.lineTo(-0.11, 0.02); a.closePath();
+const boost = extrude(a, 0.12, M.orange, 0.025); boost.position.set(0.42, -0.36, 0.3); logo.add(boost);
+logo.scale.setScalar(0.001);
+
+/* ───────────────────────── camera rig ───────────────────────── */
+const cam = {x:-0.6, y:0.6, z:13.5, tx:0, ty:0, tz:0, roll:0};
+function applyCamera(){
+  camera.position.set(cam.x, cam.y, cam.z);
+  camera.up.set(Math.sin(cam.roll), Math.cos(cam.roll), 0);
+  camera.lookAt(cam.tx, cam.ty, cam.tz);
+  key.position.set(cam.tx + 4, cam.ty + 9, cam.tz + 7);
+  key.target.position.set(cam.tx, cam.ty, cam.tz);
+}
+
+/* ───────────────────────── wordmark ───────────────────────── */
+const wm = document.getElementById('wordmark');
+wm.innerHTML = [...'pagebooster'].map(c => `<span class="ch">${c}</span>`).join('') +
+               [...'.nl'].map(c => `<span class="ch nl">${c}</span>`).join('');
+
+/* ───────────────────────── geluid (Web Audio, gesynthetiseerd) ───────────────────────── */
+let AC = null, out = null, verb = null;
+function initAudio(){
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  out = AC.createGain(); out.gain.value = 0.55;
+  const comp = AC.createDynamicsCompressor(); out.connect(comp); comp.connect(AC.destination);
+  verb = AC.createConvolver();
+  const len = AC.sampleRate * 1.8, ir = AC.createBuffer(2, len, AC.sampleRate);
+  for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3.2); }
+  verb.buffer = ir;
+  const vg = AC.createGain(); vg.gain.value = 0.28; verb.connect(vg); vg.connect(out);
+}
+const live = () => AC && !tl.paused() && !seeking;
+function noiseBuf(sec){ const b = AC.createBuffer(1, AC.sampleRate*sec, AC.sampleRate), d = b.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1; return b; }
+function env(g, t, peak, a, r){ g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + r); }
+function send(node){ node.connect(out); node.connect(verb); }
+const SFX = {
+  whoosh(dur = 0.45, f0 = 300, f1 = 2400, vol = 0.22){
+    if (!live()) return; const t = AC.currentTime;
+    const src = AC.createBufferSource(); src.buffer = noiseBuf(dur + 0.1);
+    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
+    bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur*0.7);
+    const g = AC.createGain(); env(g, t, vol, dur*0.55, dur*0.45);
+    const p = AC.createStereoPanner ? AC.createStereoPanner() : null;
+    src.connect(bp); bp.connect(g);
+    if (p){ p.pan.setValueAtTime(-0.4, t); p.pan.linearRampToValueAtTime(0.4, t + dur); g.connect(p); send(p); } else send(g);
+    src.start(t); src.stop(t + dur + 0.1);
+  },
+  tick(freq = 1400, vol = 0.07){
+    if (!live()) return; const t = AC.currentTime;
+    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq*0.6, t + 0.06);
+    const g = AC.createGain(); env(g, t, vol, 0.003, 0.07);
+    o.connect(g); send(g); o.start(t); o.stop(t + 0.1);
+  },
+  pop(vol = 0.16){
+    if (!live()) return; const t = AC.currentTime;
+    [880, 1318.5].forEach((f, i) => {
+      const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+      const g = AC.createGain(); env(g, t + i*0.06, vol, 0.005, 0.35);
+      o.connect(g); send(g); o.start(t + i*0.06); o.stop(t + i*0.06 + 0.45);
+    });
+  },
+  thump(vol = 0.4){
+    if (!live()) return; const t = AC.currentTime;
+    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.3);
+    const g = AC.createGain(); env(g, t, vol, 0.005, 0.38);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.45);
+  },
+  chime(vol = 0.09){
+    if (!live()) return; const t = AC.currentTime;
+    [523.25, 659.25, 783.99, 1046.5, 1567.98].forEach((f, i) => {
+      ['sine', 'triangle'].forEach((type, k) => {
+        const o = AC.createOscillator(); o.type = type; o.frequency.value = f * (k ? 1.002 : 1);
+        const g = AC.createGain(); env(g, t + i*0.055, vol*(k ? 0.35 : 1), 0.01, 1.6 - i*0.15);
+        o.connect(g); send(g); o.start(t + i*0.055); o.stop(t + 2);
+      });
+    });
+  },
+};
+
+/* ───────────────────────── tijdlijn ───────────────────────── */
+gsap.ticker.fps(FPS);
+const tl = gsap.timeline({paused:true, defaults:{ease:'power3.out'}});
+const q = s => document.querySelector(s);
+const prog = [...document.querySelectorAll('#progress i')];
+
+function headIn(id, t){
+  tl.fromTo(`${id} .kicker span`, {yPercent:110}, {yPercent:0, duration:0.4, ease:'expo.out'}, t)
+    .fromTo(`${id} .title span`, {yPercent:110}, {yPercent:0, duration:0.5, ease:'expo.out'}, t + 0.05);
+}
+function headOut(id, t){
+  tl.to(`${id} .kicker span, ${id} .title span`, {yPercent:-110, duration:0.3, ease:'power3.in', stagger:0.03}, t);
+}
+gsap.set('.head .kicker span, .head .title span', {yPercent:110});
+gsap.set('#wordmark .ch', {yPercent:120, opacity:0});
+gsap.set('#tagline', {opacity:0, y:20});
+
+// — Scène 1 (0 – 1.5): pagina vliegt in, elementen klikken op hun plek
+tl.call(() => SFX.whoosh(0.6, 200, 1600, 0.18), null, 0.02);
+tl.fromTo(page.position, {x:-1.2, y:-0.6, z:-5}, {x:0, y:0, z:0, duration:0.9, ease:'expo.out'}, 0)
+  .fromTo(page.rotation, {x:0.5, y:-1.1, z:0.12}, {x:0, y:0.18, z:0, duration:1.0, ease:'expo.out'}, 0)
+  .to(page.rotation, {y:-0.12, duration:0.6, ease:'sine.inOut'}, 0.95);
+els.forEach((m, i) => {
+  const t = 0.32 + i*0.034;
+  tl.fromTo(m.position, {z:1.8 + m.userData.layer*0.6}, {z:0.1, duration:0.45, ease:'back.out(1.6)'}, t)
+    .fromTo(m.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.35, ease:'back.out(1.8)'}, t);
+  if (i % 3 === 0) tl.call(() => SFX.tick(1000 + i*45, 0.05), null, t + 0.12);
+});
+tl.fromTo(cam, {x:-0.6, y:0.9, z:13.5, tx:0, ty:0.3, tz:0, roll:-0.05}, {x:0.7, y:0.6, z:9.6, ty:0.42, roll:0, duration:1.5, ease:'power2.out'}, 0);
+headIn('#h1', 0.3);
+tl.to(prog[0], {'--p':1, duration:1.5, ease:'none'}, 0);
+
+// — Scène 2 (1.5 – 2.65): exploded view, camera draait eromheen
+tl.call(() => SFX.whoosh(0.55, 120, 900, 0.2), null, 1.42);
+headOut('#h1', 1.32);
+tl.to(cam, {x:5.6, y:2.6, z:6.0, tx:0, ty:0.5, tz:0.6, roll:0.03, duration:1.15, ease:'power2.inOut'}, 1.45);
+tl.to(page.rotation, {y:0.05, x:0, duration:1.0, ease:'power2.inOut'}, 1.5);
+els.forEach(m => tl.to(m.position, {z:0.1 + m.userData.layer*0.62, duration:0.7, ease:'power3.inOut'}, 1.55 + m.userData.layer*0.04));
+tl.to(pageBase.position, {z:-0.25, duration:0.7, ease:'power3.inOut'}, 1.55);
+headIn('#h2', 1.62);
+tl.to(prog[1], {'--p':1, duration:1.15, ease:'none'}, 1.5);
+
+// — overgang naar Scène 3 (2.55 – 3.05)
+headOut('#h2', 2.42);
+tl.call(() => SFX.whoosh(0.5, 400, 3200, 0.24), null, 2.52);
+tl.to(cam, {x:S3X + 0.7, y:0.9, z:8.8, tx:S3X, ty:0.55, tz:0, roll:-0.025, duration:0.55, ease:'expo.inOut'}, 2.55);
+tl.to(page.position, {x:-2.5, duration:0.55, ease:'expo.in'}, 2.55);
+
+// — Scène 3 (2.8 – 4.0): zoekresultaten, onze pagina klimt naar #1
+tl.fromTo(search.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.45, ease:'back.out(1.6)'}, 2.75);
+tl.fromTo(typed.scale, {x:0.001}, {x:1, duration:0.35, ease:'steps(8)'}, 2.95);
+tl.fromTo(typed.position, {x:-0.9}, {x:-0.3, duration:0.35, ease:'steps(8)'}, 2.95);
+tl.fromTo(caret.position, {x:-0.9}, {x:0.34, duration:0.35, ease:'steps(8)'}, 2.95);
+results.forEach((r, i) => {
+  const t = 2.8 + i*0.05;
+  tl.fromTo(r.rotation, {x:-1.4}, {x:0, duration:0.5, ease:'expo.out'}, t)
+    .fromTo(r.position, {z:-1.2, y:SLOT(i) - 0.4}, {z:0, y:SLOT(i), duration:0.5, ease:'expo.out'}, t)
+    .fromTo(r.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.35}, t);
+  tl.call(() => SFX.tick(1500 - i*90, 0.045), null, t + 0.05);
+});
+tl.call(() => SFX.whoosh(0.4, 600, 2600, 0.14), null, 3.18);
+tl.to(hero3.position, {z:0.7, duration:0.2, ease:'power2.out'}, 3.18)
+  .to(hero3.scale, {x:1.05, y:1.05, z:1.05, duration:0.2}, 3.18)
+  .to(hero3.position, {y:SLOT(0), duration:0.5, ease:'power3.inOut'}, 3.32);
+results.slice(0, 4).forEach((r, i) => tl.to(r.position, {y:SLOT(i + 1), duration:0.42, ease:'power3.inOut'}, 3.36 + (3 - i)*0.03));
+tl.to(hero3.position, {z:0.18, duration:0.25, ease:'back.out(2)'}, 3.8)
+  .to(hero3.userData.badge.scale, {x:1, y:1, z:1, duration:0.35, ease:'back.out(2.4)'}, 3.78)
+  .call(() => SFX.pop(0.13), null, 3.8);
+tl.to(cam, {x:S3X - 0.9, y:0.0, z:8.2, ty:0.6, roll:0.02, duration:1.0, ease:'sine.inOut'}, 3.05);
+headIn('#h3', 2.92);
+tl.to(prog[2], {'--p':1, duration:1.35, ease:'none'}, 2.65);
+
+// — overgang naar Scène 4 (3.95 – 4.4)
+headOut('#h3', 3.95);
+tl.call(() => SFX.whoosh(0.48, 350, 2800, 0.24), null, 3.95);
+tl.to(cam, {x:S4X - 2.9, y:1.3, z:7.8, tx:S4X, ty:0.4, tz:0, roll:0, duration:0.5, ease:'expo.inOut'}, 3.98);
+
+// — Scène 4 (4.3 – 5.3): staafdiagram groeit + pijl omhoog
+bars.forEach((b, i) => {
+  const t = 4.3 + i*0.07;
+  tl.to(b.scale, {y:1, duration:0.6, ease:'expo.out'}, t);
+  tl.call(() => SFX.tick(700 + i*170, 0.06), null, t);
+});
+tl.call(() => SFX.whoosh(0.6, 250, 4200, 0.13), null, 4.62);
+tl.to(arrow, {v:1, duration:0.55, ease:'power2.inOut'}, 4.65);
+tl.to(head.scale, {x:1, y:1, z:1, duration:0.3, ease:'back.out(2.5)'}, 5.12);
+tl.to(cam, {x:S4X + 2.4, y:0.4, z:7.4, ty:0.5, duration:1.0, ease:'sine.inOut'}, 4.45);
+headIn('#h4', 4.3);
+tl.to(prog[3], {'--p':1, duration:1.25, ease:'none'}, 4.0);
+
+// — overgang naar logo (5.2 – 5.7)
+headOut('#h4', 5.15);
+tl.to('#url, #progress', {opacity:0, y:10, duration:0.3, ease:'power2.in'}, 5.15);
+tl.call(() => SFX.whoosh(0.7, 150, 3600, 0.26), null, 5.2);
+tl.to(cam, {x:S5X, y:-0.6, z:10.5, tx:S5X, ty:0.15, tz:0, roll:0, duration:0.6, ease:'expo.inOut'}, 5.22);
+tl.fromTo('#flash', {opacity:0}, {opacity:0.55, duration:0.12, ease:'power2.in', yoyo:true, repeat:1}, 5.42);
+
+// — Scène 5 (5.5 – 7.0): logo groot in beeld
+tl.fromTo(logo.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.7, ease:'expo.out'}, 5.5)
+  .fromTo(logo.rotation, {y:-Math.PI*1.5, x:0.6}, {y:0, x:0, duration:0.85, ease:'expo.out'}, 5.5)
+  .fromTo(logo.position, {z:-3, y:0.4}, {z:0, y:0.95, duration:0.8, ease:'expo.out'}, 5.5)
+  .fromTo(boost.position, {y:-0.9}, {y:-0.36, duration:0.5, ease:'back.out(2.2)'}, 5.85)
+  .fromTo(logoPage.position, {z:0.8}, {z:0.22, duration:0.45, ease:'back.out(2)'}, 5.75)
+  .call(() => { SFX.thump(0.32); SFX.chime(0.08); }, null, 5.95);
+tl.to('#wordmark .ch', {yPercent:0, opacity:1, duration:0.55, ease:'expo.out', stagger:0.025}, 5.95);
+tl.to('#tagline', {opacity:1, y:0, duration:0.5, ease:'power2.out'}, 6.35);
+tl.to(cam, {z:8.4, y:-0.3, ty:0.2, duration:1.5, ease:'power2.out'}, 5.82);
+tl.to(logo.rotation, {y:0.08, x:-0.04, duration:1.05, ease:'sine.inOut'}, 6.35);
+tl.set({}, {}, DURATION);
+
+/* ───────────────────────── render ───────────────────────── */
+let seeking = false;
+function resize(){
+  const r = stage.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+}
+addEventListener('resize', resize); resize();
+function draw(){ tubeGeo.setDrawRange(0, Math.floor(arrow.v * tubeCount / 6) * 6); applyCamera(); renderer.render(scene, camera); }
+gsap.ticker.add(draw);
+
+// Exportmodus voor frame-voor-frame capture (60 fps → 420 frames): window.renderFrame(n)
+window.renderFrame = n => { seeking = true; tl.pause(); tl.seek(n / FPS, true); draw(); seeking = false; };
+window.TOTAL_FRAMES = DURATION * FPS;
+
+const play = document.getElementById('play');
+function start(){
+  initAudio(); AC.resume();
+  play.classList.add('hidden');
+  tl.restart();
+}
+play.addEventListener('click', start);
+tl.eventCallback('onComplete', () => {
+  setTimeout(() => { play.querySelector('small').textContent = 'OPNIEUW AFSPELEN'; play.classList.remove('hidden'); }, 900);
+});
+addEventListener('keydown', e => { if (e.code === 'Space' || e.key === 'r') { e.preventDefault(); start(); } });
+
+// eerste frame tonen achter de play-knop
+window.renderFrame(0);
+})();
+</script>
+</body>
+</html>
