@@ -152,18 +152,21 @@ function live(w, h, ppu, draw){
   return m;
 }
 
-/* ───────────── Scène A: "Wat als je website meer klanten oplevert?" ───────────── */
+/* ───────────── Scène A (lime vlak): "Wat als je website meer klanten oplevert?" ───────────── */
 const A = new THREE.Group(); scene.add(A);
-const L1 = wordLine(A, [['Wat', WHITE, 800], ['als', WHITE, 800], ['je', WHITE, 800], ['website', WHITE, 800]], 0.42, 0.62);
-const L2 = wordLine(A, [['meer', LIME, 'italic 800', 1800], ['klanten', LIME, 'italic 800', 1800]], 0.42, 0.1);
-const L3 = wordLine(A, [['oplevert?', WHITE, 800]], 0.42, -0.42);
+const L1 = wordLine(A, [['Wat', INK, 800], ['als', INK, 800], ['je', INK, 800], ['website', INK, 800]], 0.42, 0.62);
+const L2 = wordLine(A, [['meer', INK, 'italic 800', 1800], ['klanten', INK, 'italic 800', 1800]], 0.42, 0.1);
+const L3 = wordLine(A, [['oplevert?', INK, 800]], 0.42, -0.42);
 const klanten = L2[1];
-const underline = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color:lin(LIME), toneMapped:false}));
+const underline = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color:lin(INK), toneMapped:false}));
 underline.geometry.translate(0.5, 0, 0);
 const wPad = 0.42*0.3*2;
 const ulX0 = L2[0].position.x - (L2[0].userData.w - wPad)/2, ulW = klanten.position.x + (klanten.userData.w - wPad)/2 - ulX0;
 underline.position.set(ulX0, L2[0].position.y - 0.25, 0.01); underline.scale.set(0.001, 0.05, 1);
 A.add(underline);
+// lime vlak achter de opening; schrijft geen diepte, dus de scherptediepte laat de tekst scherp
+const limeWall = new THREE.Mesh(new THREE.PlaneGeometry(14, 30), new THREE.MeshBasicMaterial({color:lin(LIME), toneMapped:false, depthWrite:false}));
+limeWall.position.set(0, 0, -4); limeWall.renderOrder = -500; A.add(limeWall);
 
 /* ───────────── Scène B (donker): zoeken → klik → Pagebooster klimt naar #1 ───────────── */
 const BX = 20;
@@ -535,6 +538,7 @@ function wordIn(m, t, {dz = 1.6, dy = -0.08, dur = 0.8} = {}){
 }
 [...L1, ...L2, ...L3, ...H3, ...HD1, ...HD2, ...notes, ...results, win, searchUI, btn, askLabel, card, ...chips, bar2, bar2Text, tagline, url].forEach(m => m.material.opacity = 0);
 
+tl.set(look, {dark:0}, 0);   // opening: lichte nabewerking (geen bloom, zacht vignet) op het lime vlak
 // — A (0 – 4.19): woord voor woord, dan vliegt de camera het woord "klanten" in
 L1.forEach((m, i) => wordIn(m, 0.25 + i*0.24));
 L2.forEach((m, i) => wordIn(m, 1.3 + i*0.3, {dz:2.2}));
@@ -550,7 +554,7 @@ tl.to(look, {flash:1, duration:0.2, ease:'power2.in'}, 3.98);
 
 // — B (4.19 – 11.16): zoekbalk typt, klik, resultaten, Pagebooster klimt naar #1 en wordt aangeklikt
 const TB = BEAT*9;   // ≈ 4.19 s: hier valt de beat in
-tl.set(look, {range:0.22}, TB);
+tl.set(look, {dark:1, range:0.22}, TB);
 tl.set(cam, {x:BX + 0.75, y:0.95, z:2.9, tx:BX + 0.1, ty:0.68, tz:0, roll:0.03}, TB);
 tl.to(look, {flash:0, blur:0, duration:0.4, ease:'power2.out'}, TB);
 cue(TB, 'boom', 0.18);
