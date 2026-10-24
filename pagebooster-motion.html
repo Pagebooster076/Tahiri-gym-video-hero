@@ -5,77 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pagebooster Motion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,500;0,800;1,800&family=Inter:wght@500;800&display=swap" rel="stylesheet">
 <style>
-  /* ── Merkkleuren: pas hier aan als het officiële logo afwijkt ── */
+  /* Pagebooster huisstijl */
   :root{
-    --bg:#F4F6FB;
-    --ink:#0E1A3A;
-    --blue:#1F5BFF;
-    --orange:#FF6B2C;
-    --muted:#8A94AD;
+    --bg:#0C0C0C;
+    --lime:#DFF841;     /* logo */
+    --lime-soft:#D1FF6D;/* accentwoorden */
+    --paper:#F4F4F1;
+    --grey:#CACAC8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:#0b0e16;overflow:hidden}
-  body{display:flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+  html,body{height:100%;background:#000;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
 
-  /* 9:16 stage, geschaald op basis van 1080×1920 */
-  #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));overflow:hidden;
-    background:radial-gradient(120% 70% at 50% 35%,#ffffff 0%,var(--bg) 55%,#E6EBF5 100%);
-    container-type:size}
+  /* 9:16 stage */
+  #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));overflow:hidden;background:var(--bg);container-type:size}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .u{font-size:calc(100cqw / 1080)} /* 1em-schaal hulp niet nodig; we gebruiken cqw direct */
+  #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 60% at 50% 40%,transparent 45%,rgba(0,0,0,.6) 100%)}
+  #grain{position:absolute;inset:-50%;pointer-events:none;opacity:.09;mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
-  /* Koppen per scène */
-  .head{position:absolute;left:0;right:0;top:9.5cqh;text-align:center;color:var(--ink);pointer-events:none}
-  .kicker{display:block;overflow:hidden;font-weight:700;font-size:3.1cqw;letter-spacing:.32em;color:var(--blue);text-transform:uppercase;margin-bottom:1.6cqw}
+  /* Topbalk zoals in de carrousel */
+  #top{position:absolute;left:7cqw;right:7cqw;top:5.6cqh;display:flex;align-items:center;justify-content:space-between}
+  #top svg{width:25cqw;height:auto;display:block}
+  #counter{font-weight:800;font-size:2.6cqw;letter-spacing:.12em;color:var(--grey);display:flex;gap:.5em}
+  #counter .num{display:inline-block;height:1.2em;overflow:hidden;line-height:1.2em}
+  #counter .num span{display:block}
+
+  /* Koppen linksonder */
+  .head{position:absolute;left:7cqw;right:7cqw;bottom:17cqh;color:var(--paper);pointer-events:none}
+  .kicker{display:block;overflow:hidden;font-weight:800;font-size:2.7cqw;letter-spacing:.24em;color:var(--lime-soft);text-transform:uppercase;margin-bottom:2.2cqw}
   .kicker span,.title span{display:inline-block;will-change:transform}
-  .title{display:block;overflow:hidden;font-weight:800;font-size:9.6cqw;letter-spacing:-.035em;line-height:1.08;padding-bottom:.08em}
-  .title em{font-style:normal;color:var(--orange)}
+  .title{display:block;overflow:hidden;font-family:"Inter Tight","Inter",sans-serif;font-weight:800;font-size:11.2cqw;letter-spacing:-.055em;line-height:.98;padding:0 .08em .1em 0}
+  .title em{font-style:italic;color:var(--lime-soft)}
+  .sub{display:block;overflow:hidden;margin-top:2.6cqw;font-weight:500;font-size:3.7cqw;letter-spacing:-.01em;color:var(--grey)}
 
-  /* Footer url */
-  #url{position:absolute;left:0;right:0;bottom:5.2cqh;text-align:center;font-weight:700;font-size:3cqw;letter-spacing:.06em;color:var(--ink);opacity:.55}
-  #url b{color:var(--orange)}
-  #progress{position:absolute;left:50%;bottom:3.4cqh;transform:translateX(-50%);display:flex;gap:1.2cqw}
-  #progress i{display:block;width:7cqw;height:.45cqw;border-radius:1cqw;background:rgba(14,26,58,.12);overflow:hidden}
-  #progress i::after{content:"";display:block;height:100%;width:100%;background:var(--blue);transform:scaleX(var(--p,0));transform-origin:left}
+  /* Eindbeeld */
+  #endline{position:absolute;left:0;right:0;top:57cqh;text-align:center;font-family:"Inter Tight","Inter",sans-serif;font-weight:800;font-size:6.2cqw;letter-spacing:-.045em;color:var(--paper);overflow:hidden;padding-bottom:.1em}
+  #endline span{display:inline-block}
+  #endline em{font-style:italic;color:var(--lime-soft)}
+  #endurl{position:absolute;left:0;right:0;bottom:8cqh;text-align:center;font-weight:800;font-size:2.8cqw;letter-spacing:.24em;color:var(--grey)}
 
-  /* Eindbeeld wordmark */
-  #wordmark{position:absolute;left:0;right:0;top:63cqh;text-align:center;color:var(--ink);font-weight:800;font-size:12.4cqw;letter-spacing:-.045em;line-height:1;white-space:nowrap}
-  #wordmark .ch{display:inline-block;will-change:transform}
-  #wordmark .nl{color:var(--orange)}
-  #tagline{position:absolute;left:0;right:0;top:73.5cqh;text-align:center;color:var(--muted);font-weight:500;font-size:3.6cqw;letter-spacing:.02em}
-  #tagline b{color:var(--ink);font-weight:700}
+  #flash{position:absolute;inset:0;background:var(--lime);opacity:0;pointer-events:none;mix-blend-mode:normal}
 
-  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
-
-  /* Start / replay */
-  #play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4cqw;
-    background:rgba(244,246,251,.72);backdrop-filter:blur(6px);cursor:pointer;border:0;font:inherit;color:var(--ink)}
-  #play .btn{width:20cqw;height:20cqw;border-radius:50%;background:var(--blue);display:grid;place-items:center;box-shadow:0 2cqw 6cqw rgba(31,91,255,.35)}
-  #play .btn svg{width:7cqw;height:7cqw;margin-left:1cqw}
-  #play small{font-weight:700;font-size:3.2cqw;letter-spacing:.08em;opacity:.7}
+  #play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3cqw;
+    background:rgba(12,12,12,.55);backdrop-filter:blur(5px);cursor:pointer;border:0;font:inherit;color:var(--paper)}
+  #play .btn{width:19cqw;height:19cqw;border-radius:50%;background:var(--lime);display:grid;place-items:center;box-shadow:0 0 8cqw rgba(223,248,65,.35)}
+  #play .btn svg{width:6.5cqw;height:6.5cqw;margin-left:1cqw}
+  #play small{font-weight:800;font-size:2.7cqw;letter-spacing:.24em;color:var(--grey)}
   #play.hidden{display:none}
 </style>
 </head>
 <body>
 <div id="stage">
   <canvas id="gl"></canvas>
+  <div id="vignette"></div>
 
-  <div class="head" id="h1"><span class="kicker"><span>01 — Ontwerp</span></span><span class="title"><span>Strak <em>ontworpen.</em></span></span></div>
-  <div class="head" id="h2"><span class="kicker"><span>02 — Techniek</span></span><span class="title"><span>Slim <em>gebouwd.</em></span></span></div>
-  <div class="head" id="h3"><span class="kicker"><span>03 — SEO</span></span><span class="title"><span>Bovenaan <em>in Google.</em></span></span></div>
-  <div class="head" id="h4"><span class="kicker"><span>04 — Groei</span></span><span class="title"><span>Meer <em>klanten.</em></span></span></div>
+  <div id="top">
+    <svg id="toplogo" viewBox="0 0 1000 142" aria-label="Pagebooster"></svg>
+    <div id="counter"><span class="num"><span>01</span><span>02</span><span>03</span><span>04</span></span><span>/</span><span>04</span></div>
+  </div>
 
-  <div id="url">pagebooster<b>.nl</b></div>
-  <div id="progress"><i></i><i></i><i></i><i></i></div>
+  <div class="head" id="h1"><span class="kicker"><span>Eerlijk is eerlijk</span></span><span class="title"><span>‘Prima’ kost</span></span><span class="title"><span>je <em>klanten.</em></span></span></div>
+  <div class="head" id="h2"><span class="kicker"><span>Ontwerp &amp; bouw</span></span><span class="title"><span>Strak, slim</span></span><span class="title"><span>en <em>snel.</em></span></span></div>
+  <div class="head" id="h3"><span class="kicker"><span>Vindbaarheid</span></span><span class="title"><span>Bovenaan</span></span><span class="title"><span>in <em>Google.</em></span></span></div>
+  <div class="head" id="h4"><span class="kicker"><span>Resultaat</span></span><span class="title"><span>Meer</span></span><span class="title"><span><em>aanvragen.</em></span></span></div>
 
-  <div id="wordmark"></div>
-  <div id="tagline">Websites die <b>groeien.</b></div>
+  <div id="endline"><span>Websites die <em>werken.</em></span></div>
+  <div id="endurl">PAGEBOOSTER.NL</div>
 
+  <div id="grain"></div>
   <div id="flash"></div>
   <button id="play" aria-label="Afspelen">
-    <span class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6 4l14 8-14 8z"/></svg></span>
+    <span class="btn"><svg viewBox="0 0 24 24" fill="#0C0C0C"><path d="M6 4l14 8-14 8z"/></svg></span>
     <small>AFSPELEN MET GELUID</small>
   </button>
 </div>
@@ -84,62 +87,69 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 (() => {
-const css = getComputedStyle(document.documentElement);
-const C = {
-  bg:     new THREE.Color(css.getPropertyValue('--bg').trim()),
-  ink:    new THREE.Color(css.getPropertyValue('--ink').trim()),
-  blue:   new THREE.Color(css.getPropertyValue('--blue').trim()),
-  orange: new THREE.Color(css.getPropertyValue('--orange').trim()),
-};
-const DURATION = 7, FPS = 60;
+/* Pagebooster-woordmerk, gevectoriseerd: per letter een omtrek (o) met gaten (h), genormaliseerd op breedte 1 */
+const LOGO = {"aspect":0.1415,"shapes":[{"o":[[0.1342,0.0154],[0.131,0.012],[0.127,0.0091],[0.1225,0.0067],[0.1173,0.0047],[0.1113,0.003],[0.105,0.0018],[0.0882,0.0002],[0.067,0.0001],[0.0521,0.0014],[0.0454,0.0028],[0.0395,0.0047],[0.0346,0.007],[0.0306,0.0096],[0.0273,0.0128],[0.0245,0.0168],[0.0225,0.0208],[0.0207,0.0264],[0.0143,0.0551],[0.009,0.0759],[0.0021,0.105],[0.0005,0.1154],[0.0007,0.1178],[0.0018,0.1199],[0.003,0.1209],[0.0046,0.1216],[0.0089,0.1216],[0.0171,0.1192],[0.0195,0.118],[0.0212,0.1166],[0.0227,0.1145],[0.0237,0.1117],[0.0293,0.0901],[0.0314,0.0864],[0.0347,0.0837],[0.038,0.0825],[0.0436,0.0814],[0.0585,0.0801],[0.0748,0.0775],[0.092,0.0733],[0.1031,0.07],[0.1109,0.0669],[0.1188,0.063],[0.1247,0.059],[0.1294,0.0547],[0.1334,0.0499],[0.1362,0.045],[0.1378,0.0402],[0.1385,0.0335],[0.1381,0.0246],[0.1368,0.0197]],"h":[[[0.1078,0.028],[0.109,0.0316],[0.1092,0.0354],[0.1083,0.0395],[0.1066,0.0432],[0.1039,0.0468],[0.1005,0.05],[0.0957,0.0534],[0.0905,0.0564],[0.0849,0.0587],[0.0752,0.0615],[0.0558,0.0649],[0.0473,0.0656],[0.0429,0.0655],[0.0399,0.0645],[0.0381,0.0626],[0.0376,0.0603],[0.0379,0.057],[0.0427,0.0357],[0.044,0.0316],[0.0456,0.0283],[0.0477,0.0255],[0.0507,0.0228],[0.054,0.0208],[0.0588,0.0189],[0.064,0.018],[0.0778,0.0172],[0.0908,0.0178],[0.0961,0.0191],[0.1012,0.0215],[0.105,0.0243]]]},{"o":[[0.1507,0.0389],[0.1495,0.0402],[0.1484,0.0422],[0.1476,0.0465],[0.1478,0.0482],[0.1484,0.0496],[0.1507,0.0514],[0.1556,0.0521],[0.1657,0.0523],[0.185,0.0521],[0.1914,0.0525],[0.1942,0.0533],[0.1964,0.0545],[0.1976,0.0564],[0.1976,0.0582],[0.197,0.0593],[0.1958,0.0605],[0.1942,0.0612],[0.1921,0.0616],[0.1694,0.0619],[0.1545,0.0628],[0.1474,0.0648],[0.1415,0.068],[0.1377,0.0713],[0.1348,0.0752],[0.1325,0.08],[0.1311,0.0853],[0.1305,0.0905],[0.131,0.0949],[0.1326,0.0994],[0.135,0.1028],[0.1393,0.1063],[0.1445,0.1085],[0.1504,0.1096],[0.1601,0.1102],[0.1798,0.1101],[0.1969,0.1092],[0.2036,0.1078],[0.2066,0.1063],[0.209,0.1045],[0.2125,0.1005],[0.215,0.0949],[0.2222,0.0644],[0.2235,0.0562],[0.2236,0.0517],[0.2224,0.0473],[0.2202,0.0438],[0.2173,0.0414],[0.2133,0.0395],[0.2077,0.0378],[0.2022,0.0371],[0.1575,0.0369],[0.1535,0.0374]],"h":[[[0.1545,0.0867],[0.1548,0.0849],[0.1557,0.0831],[0.1584,0.0801],[0.162,0.0781],[0.1668,0.077],[0.178,0.0764],[0.1898,0.0766],[0.1919,0.0772],[0.1936,0.0783],[0.1946,0.0796],[0.1952,0.0816],[0.1952,0.0841],[0.1945,0.0867],[0.1933,0.0893],[0.1919,0.0913],[0.19,0.093],[0.1876,0.0945],[0.185,0.0955],[0.1821,0.0961],[0.1679,0.0964],[0.1642,0.0961],[0.1612,0.0954],[0.1584,0.0939],[0.1561,0.0917],[0.1548,0.0893]]]},{"o":[[0.3191,0.0388],[0.3163,0.0374],[0.3124,0.0369],[0.2714,0.0369],[0.2647,0.0372],[0.2587,0.0383],[0.2487,0.0414],[0.2432,0.0445],[0.2392,0.0479],[0.2357,0.0525],[0.2328,0.0581],[0.2296,0.0678],[0.2283,0.073],[0.2264,0.0853],[0.2261,0.0901],[0.227,0.0957],[0.2291,0.1004],[0.2312,0.103],[0.2339,0.1052],[0.2375,0.1071],[0.2416,0.1085],[0.2476,0.1095],[0.2554,0.1101],[0.2662,0.1102],[0.2776,0.1096],[0.2792,0.11],[0.2803,0.1108],[0.281,0.1121],[0.281,0.1137],[0.2797,0.1168],[0.2768,0.1201],[0.2733,0.1226],[0.2692,0.1241],[0.2628,0.1247],[0.2338,0.1248],[0.2308,0.1251],[0.2284,0.1258],[0.2265,0.127],[0.2253,0.1284],[0.2235,0.1322],[0.2232,0.1344],[0.2234,0.1361],[0.224,0.1378],[0.2251,0.1391],[0.2276,0.1404],[0.2316,0.141],[0.2587,0.1415],[0.2695,0.1408],[0.2796,0.1384],[0.2848,0.1366],[0.2904,0.1332],[0.2956,0.1286],[0.2992,0.124],[0.3023,0.1184],[0.3083,0.1009],[0.3142,0.0748],[0.3179,0.057],[0.3207,0.0469],[0.3208,0.0421],[0.3201,0.0402]],"h":[[[0.2931,0.0539],[0.2943,0.0555],[0.2949,0.0574],[0.2949,0.0599],[0.2944,0.0629],[0.2887,0.0853],[0.2873,0.0885],[0.2849,0.0914],[0.2814,0.0938],[0.2777,0.0953],[0.274,0.0959],[0.2681,0.096],[0.2628,0.0958],[0.2591,0.095],[0.2555,0.0934],[0.2526,0.0911],[0.2509,0.0885],[0.2501,0.0853],[0.2502,0.0812],[0.2512,0.0741],[0.2526,0.0685],[0.2543,0.064],[0.2563,0.0607],[0.259,0.0577],[0.2614,0.0557],[0.2643,0.0541],[0.2673,0.0531],[0.2707,0.0525],[0.277,0.0522],[0.2874,0.0522],[0.2907,0.0527]]]},{"o":[[0.3365,0.0455],[0.3324,0.0506],[0.3287,0.0585],[0.3255,0.0696],[0.3237,0.0793],[0.3215,0.0879],[0.3212,0.092],[0.3218,0.0957],[0.3235,0.0994],[0.3262,0.1028],[0.3295,0.1055],[0.3336,0.1076],[0.3377,0.1087],[0.3429,0.1093],[0.3894,0.1094],[0.3938,0.1087],[0.3966,0.1069],[0.3988,0.1038],[0.3996,0.0998],[0.3987,0.097],[0.3963,0.0951],[0.3942,0.0945],[0.3913,0.0942],[0.3596,0.0942],[0.3533,0.0937],[0.3497,0.0925],[0.3472,0.0907],[0.3457,0.0881],[0.3456,0.0857],[0.3464,0.0836],[0.3481,0.0817],[0.3504,0.0804],[0.3529,0.0799],[0.3995,0.0796],[0.4036,0.0791],[0.4066,0.0778],[0.4085,0.076],[0.4099,0.0733],[0.4133,0.0611],[0.414,0.057],[0.414,0.0532],[0.4132,0.0499],[0.4116,0.0466],[0.4094,0.0439],[0.4068,0.0417],[0.4036,0.0399],[0.3995,0.0384],[0.395,0.0374],[0.3879,0.0369],[0.3622,0.0369],[0.3552,0.0376],[0.3459,0.0401],[0.3407,0.0424]],"h":[[[0.353,0.0597],[0.3533,0.0581],[0.3543,0.0565],[0.3575,0.0538],[0.3611,0.0525],[0.3667,0.0518],[0.3805,0.0522],[0.3849,0.0528],[0.387,0.0537],[0.3888,0.055],[0.39,0.0568],[0.3903,0.0584],[0.3898,0.0606],[0.3883,0.0623],[0.386,0.0632],[0.3827,0.0636],[0.3574,0.0635],[0.3554,0.063],[0.354,0.0621],[0.3532,0.0609]]]},{"o":[[0.4406,0.0013],[0.4391,0.0021],[0.4375,0.0037],[0.4351,0.0082],[0.4333,0.013],[0.4238,0.0514],[0.4223,0.0603],[0.418,0.0782],[0.4158,0.0897],[0.4154,0.0949],[0.4165,0.0994],[0.4188,0.1033],[0.4223,0.1065],[0.4267,0.1085],[0.4322,0.1096],[0.4523,0.1105],[0.4613,0.1104],[0.4765,0.1092],[0.4806,0.1085],[0.4844,0.1073],[0.4903,0.1041],[0.4954,0.0996],[0.4987,0.0949],[0.502,0.0875],[0.5059,0.0756],[0.5069,0.0707],[0.5082,0.0577],[0.5078,0.0536],[0.5067,0.0499],[0.5043,0.0459],[0.5007,0.0426],[0.4966,0.0403],[0.4903,0.0382],[0.4821,0.037],[0.4572,0.0371],[0.4552,0.0368],[0.4539,0.0362],[0.453,0.0354],[0.4524,0.034],[0.4522,0.0298],[0.4558,0.0145],[0.4577,0.0082],[0.4579,0.006],[0.4575,0.0043],[0.4568,0.0032],[0.4556,0.002],[0.4523,0.0007],[0.4449,0.0004]],"h":[[[0.4535,0.0534],[0.4564,0.0528],[0.4598,0.0525],[0.471,0.0525],[0.4754,0.0529],[0.4784,0.0537],[0.4807,0.055],[0.4823,0.0566],[0.4836,0.0589],[0.4843,0.0633],[0.484,0.0707],[0.4831,0.0748],[0.48,0.0838],[0.4779,0.0874],[0.4749,0.0908],[0.4713,0.0934],[0.4676,0.0951],[0.4643,0.0959],[0.4602,0.0963],[0.4527,0.0964],[0.4486,0.096],[0.4457,0.095],[0.4433,0.0935],[0.4417,0.0917],[0.4405,0.0893],[0.4399,0.0856],[0.4404,0.0804],[0.4447,0.0618],[0.4461,0.0589],[0.4479,0.0567],[0.4506,0.0547]]]},{"o":[[0.5221,0.05],[0.5199,0.0529],[0.518,0.0562],[0.515,0.0644],[0.5134,0.0707],[0.5111,0.0864],[0.5117,0.092],[0.5137,0.0979],[0.5164,0.1017],[0.5205,0.105],[0.5246,0.1071],[0.5287,0.1086],[0.5328,0.1094],[0.5391,0.1102],[0.5454,0.1105],[0.5573,0.1105],[0.573,0.1096],[0.5808,0.1081],[0.5875,0.1053],[0.5904,0.1034],[0.5933,0.101],[0.5975,0.0957],[0.6004,0.0897],[0.6026,0.0827],[0.6053,0.07],[0.606,0.0592],[0.6056,0.0536],[0.6041,0.0492],[0.6013,0.0454],[0.5975,0.0424],[0.5946,0.0409],[0.5912,0.0397],[0.5845,0.0379],[0.58,0.0371],[0.5719,0.0369],[0.5506,0.0371],[0.5432,0.0386],[0.5369,0.0403],[0.5331,0.0417],[0.5272,0.0453]],"h":[[[0.5787,0.0564],[0.5808,0.0589],[0.582,0.0618],[0.5824,0.0652],[0.582,0.0692],[0.5797,0.08],[0.5785,0.0841],[0.576,0.0886],[0.5725,0.0923],[0.5689,0.0948],[0.5652,0.096],[0.5614,0.0964],[0.5465,0.0962],[0.5432,0.0955],[0.5403,0.0942],[0.5378,0.092],[0.5358,0.0889],[0.535,0.0856],[0.5349,0.0815],[0.5358,0.073],[0.5369,0.0689],[0.539,0.064],[0.541,0.0608],[0.5437,0.0578],[0.5469,0.0555],[0.5503,0.054],[0.554,0.0531],[0.5588,0.0526],[0.567,0.0525],[0.5715,0.0529],[0.5756,0.0542]]]},{"o":[[0.6229,0.0479],[0.6186,0.0536],[0.6156,0.0599],[0.6122,0.07],[0.6092,0.086],[0.6094,0.0912],[0.6113,0.0968],[0.6144,0.1015],[0.6184,0.1052],[0.6217,0.1071],[0.6251,0.1083],[0.6351,0.1099],[0.6437,0.1105],[0.653,0.1106],[0.669,0.1098],[0.6768,0.1085],[0.6835,0.106],[0.6894,0.1023],[0.6935,0.0978],[0.6967,0.0923],[0.6992,0.0856],[0.7039,0.0663],[0.7046,0.0611],[0.7044,0.0558],[0.703,0.0514],[0.7,0.0467],[0.6961,0.0431],[0.6932,0.0414],[0.6902,0.0402],[0.6828,0.0381],[0.6783,0.0372],[0.6716,0.0369],[0.6504,0.037],[0.6441,0.0379],[0.6333,0.041],[0.6274,0.0441]],"h":[[[0.6504,0.0535],[0.6538,0.0528],[0.6582,0.0525],[0.666,0.0526],[0.6705,0.0532],[0.6738,0.0543],[0.6761,0.0558],[0.678,0.0579],[0.6791,0.0603],[0.6797,0.0648],[0.6786,0.0752],[0.6779,0.0789],[0.6766,0.0827],[0.6743,0.0871],[0.6714,0.0906],[0.6679,0.0935],[0.6642,0.0952],[0.6601,0.096],[0.6467,0.0963],[0.6433,0.0957],[0.6404,0.0946],[0.6376,0.0928],[0.6356,0.0906],[0.6342,0.0878],[0.6336,0.0834],[0.6345,0.0752],[0.6357,0.07],[0.6379,0.064],[0.64,0.0604],[0.6427,0.0576],[0.6463,0.0552]]]},{"o":[[0.7194,0.0443],[0.7169,0.0468],[0.7146,0.0499],[0.7129,0.0536],[0.7119,0.0573],[0.7116,0.0614],[0.7121,0.0648],[0.7132,0.0677],[0.7152,0.0705],[0.7175,0.0727],[0.7204,0.0747],[0.7271,0.0775],[0.7383,0.0799],[0.7502,0.0809],[0.755,0.0823],[0.7578,0.0838],[0.7595,0.0854],[0.7605,0.0872],[0.7606,0.0893],[0.7595,0.0916],[0.7571,0.0937],[0.7539,0.0952],[0.7502,0.096],[0.7439,0.0962],[0.7152,0.0948],[0.7122,0.095],[0.7101,0.0955],[0.707,0.0974],[0.7059,0.0989],[0.7052,0.1006],[0.7051,0.1042],[0.7057,0.1058],[0.7067,0.1072],[0.7093,0.1088],[0.7133,0.1094],[0.7286,0.1098],[0.7513,0.1098],[0.7584,0.1095],[0.7647,0.1088],[0.7695,0.1075],[0.7744,0.105],[0.7785,0.1017],[0.7811,0.0986],[0.7829,0.0953],[0.7841,0.0916],[0.7846,0.0879],[0.7846,0.0838],[0.7839,0.0804],[0.7824,0.0771],[0.7803,0.0744],[0.7758,0.071],[0.7695,0.0683],[0.7621,0.0664],[0.7468,0.0638],[0.7406,0.0622],[0.7386,0.0612],[0.7372,0.06],[0.7364,0.0586],[0.7362,0.0574],[0.7368,0.0555],[0.7386,0.0538],[0.7409,0.0527],[0.7439,0.052],[0.7487,0.0518],[0.7606,0.0524],[0.7751,0.0526],[0.7781,0.0524],[0.7802,0.0519],[0.7819,0.051],[0.7833,0.0498],[0.785,0.0465],[0.7853,0.0422],[0.7847,0.0402],[0.7837,0.0389],[0.7813,0.0375],[0.7774,0.0369],[0.7386,0.0371],[0.7334,0.0379],[0.7275,0.0397],[0.723,0.0418]],"h":[]},{"o":[[0.8183,0.0106],[0.8137,0.0118],[0.8119,0.0131],[0.8105,0.0148],[0.8087,0.019],[0.8059,0.0301],[0.8041,0.0335],[0.8014,0.0356],[0.7957,0.0376],[0.7937,0.0387],[0.7918,0.0405],[0.7905,0.0432],[0.79,0.0465],[0.7907,0.049],[0.7923,0.0508],[0.7974,0.0538],[0.7985,0.0554],[0.7988,0.0574],[0.7973,0.0652],[0.7947,0.0745],[0.7914,0.0886],[0.791,0.092],[0.791,0.0949],[0.7918,0.0987],[0.7938,0.1023],[0.7969,0.1053],[0.8008,0.1076],[0.8049,0.1088],[0.8101,0.1095],[0.8187,0.1098],[0.8269,0.1096],[0.8312,0.1088],[0.834,0.107],[0.8353,0.1055],[0.8363,0.1035],[0.8368,0.0999],[0.836,0.0977],[0.834,0.096],[0.8317,0.0953],[0.8246,0.0951],[0.8209,0.0943],[0.8173,0.0922],[0.816,0.0908],[0.8151,0.0892],[0.8146,0.0864],[0.815,0.083],[0.817,0.0745],[0.8212,0.0592],[0.8233,0.0551],[0.8247,0.0538],[0.8266,0.0527],[0.8302,0.0521],[0.8406,0.0519],[0.8428,0.0515],[0.8448,0.0506],[0.8465,0.0493],[0.8479,0.0471],[0.8487,0.0447],[0.8488,0.0422],[0.8478,0.0394],[0.8453,0.0376],[0.8421,0.037],[0.8332,0.0365],[0.8312,0.036],[0.8295,0.0348],[0.8285,0.0332],[0.8281,0.0309],[0.8307,0.0171],[0.8308,0.015],[0.8304,0.0134],[0.8289,0.0118],[0.8268,0.0108],[0.8235,0.0105]],"h":[]},{"o":[[0.8599,0.0458],[0.8559,0.0507],[0.8528,0.057],[0.8492,0.0704],[0.8465,0.0838],[0.846,0.0901],[0.8464,0.0949],[0.8479,0.099],[0.8507,0.1027],[0.8541,0.1055],[0.8582,0.1076],[0.8622,0.1087],[0.8675,0.1093],[0.9125,0.1094],[0.9169,0.1087],[0.9197,0.107],[0.9218,0.1038],[0.9224,0.1016],[0.9224,0.0998],[0.9214,0.097],[0.919,0.0951],[0.9169,0.0945],[0.914,0.0942],[0.8824,0.0942],[0.8764,0.0937],[0.8728,0.0925],[0.8705,0.0907],[0.8691,0.0881],[0.869,0.0853],[0.8699,0.083],[0.8713,0.0815],[0.8732,0.0804],[0.8757,0.0799],[0.9226,0.0796],[0.9262,0.0792],[0.929,0.0781],[0.9314,0.0757],[0.9333,0.0718],[0.9351,0.0652],[0.9365,0.0566],[0.9365,0.0525],[0.9358,0.0491],[0.9342,0.0459],[0.9321,0.0433],[0.9295,0.0412],[0.9263,0.0396],[0.9218,0.0381],[0.9173,0.0372],[0.9114,0.0369],[0.885,0.0369],[0.8786,0.0376],[0.8693,0.0403],[0.8641,0.0427]],"h":[[[0.8762,0.0597],[0.8764,0.0584],[0.8772,0.0568],[0.8802,0.054],[0.8838,0.0525],[0.8891,0.0519],[0.9013,0.0518],[0.9073,0.0525],[0.9094,0.0533],[0.9112,0.0545],[0.9124,0.0561],[0.9129,0.0577],[0.9125,0.06],[0.9106,0.062],[0.908,0.0631],[0.9047,0.0636],[0.8809,0.0634],[0.8788,0.0629],[0.8774,0.0621],[0.8765,0.0609]]]},{"o":[[0.9978,0.0386],[0.9954,0.0374],[0.9918,0.0369],[0.9754,0.0369],[0.9691,0.0374],[0.9635,0.0388],[0.9583,0.0409],[0.9543,0.0435],[0.9509,0.0467],[0.9484,0.0499],[0.9464,0.0536],[0.9447,0.0577],[0.9433,0.0625],[0.9351,0.1001],[0.9351,0.1045],[0.9356,0.1061],[0.9367,0.1075],[0.9381,0.1084],[0.9401,0.1091],[0.9468,0.1094],[0.9511,0.1085],[0.9542,0.1064],[0.9555,0.1045],[0.9564,0.102],[0.965,0.0652],[0.9662,0.0614],[0.9677,0.0585],[0.9708,0.055],[0.9729,0.0537],[0.9751,0.0529],[0.9795,0.0522],[0.9918,0.052],[0.9939,0.0516],[0.9959,0.0507],[0.998,0.0485],[0.9993,0.0447],[0.9992,0.0411]],"h":[]}]};
 
-/* ───────────────────────── Three.js basis ───────────────────────── */
+const DURATION = 7, FPS = 60;
+const css = getComputedStyle(document.documentElement);
+const hex = v => css.getPropertyValue(v).trim();
+const lin = c => new THREE.Color(c).convertSRGBToLinear();
+
+/* ───────────── 2D logo in de topbalk ───────────── */
+const pathD = LOGO.shapes.flatMap(s => [s.o, ...s.h]).map(poly => 'M' + poly.map(p => `${(p[0]*1000).toFixed(1)} ${(p[1]*1000).toFixed(1)}`).join('L') + 'Z').join('');
+document.getElementById('toplogo').innerHTML = `<path fill="${hex('--lime')}" fill-rule="evenodd" d="${pathD}"/>`;
+
+/* ───────────── Three.js basis ───────────── */
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('gl');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true});
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(lin(hex('--bg')));
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(new THREE.Color(C.bg).convertSRGBToLinear(), 12, 30);
-const camera = new THREE.PerspectiveCamera(42, 9/16, 0.1, 100);
+scene.fog = new THREE.Fog(lin(hex('--bg')), 9, 24);
+const camera = new THREE.PerspectiveCamera(40, 9/16, 0.1, 100);
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe5f2, 0.85));
-const key = new THREE.DirectionalLight(0xffffff, 0.75);
-key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
-key.shadow.radius = 6;
-key.shadow.bias = -0.0004;
-Object.assign(key.shadow.camera, {left:-6, right:6, top:6, bottom:-6, near:1, far:40});
-scene.add(key, key.target);
-const rim = new THREE.DirectionalLight(0xcfdcff, 0.35);
-rim.position.set(-6, 4, -6);
-scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xe8eadc, 0x0c0c0c, 0.35));
+const spot = new THREE.SpotLight(0xfffbea, 1.9, 40, 0.5, 0.8, 1.2);
+spot.castShadow = true;
+spot.shadow.mapSize.set(2048, 2048);
+spot.shadow.bias = -0.0003;
+spot.shadow.radius = 4;
+scene.add(spot, spot.target);
+const fill = new THREE.DirectionalLight(0xd9ffa0, 0.25);  // lichte limetint van links
+scene.add(fill, fill.target);
+const sheen = new THREE.PointLight(0xffffff, 0, 3.2, 2);    // lichtveeg over het logo
+scene.add(sheen);
 
-// subtiele vloer met grid voor diepte
-const floorY = -3.4;
-const grid = new THREE.GridHelper(120, 120, 0xc9d2e6, 0xdde3f0);
-grid.position.set(18, floorY, 0);
-grid.material.transparent = true; grid.material.opacity = 0.55;
-scene.add(grid);
-const shadowFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 40), new THREE.ShadowMaterial({opacity:0.08}));
-shadowFloor.rotation.x = -Math.PI/2; shadowFloor.position.set(18, floorY + 0.001, 0);
-shadowFloor.receiveShadow = true;
-scene.add(shadowFloor);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(140, 60), new THREE.MeshStandardMaterial({color:lin('#141414'), roughness:0.55, metalness:0.0}));
+floor.rotation.x = -Math.PI/2; floor.position.set(18, -1.45, 0); floor.receiveShadow = true;
+scene.add(floor);
 
-/* ───────────────────────── helpers ───────────────────────── */
-const lin = c => new THREE.Color(c).convertSRGBToLinear();
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: lin(color), roughness:0.45, metalness:0.05}, o));
+/* ───────────── helpers ───────────── */
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: lin(color), roughness:0.5, metalness:0.02}, o));
 const M = {
-  white:  mat(0xffffff, {roughness:0.6}),
-  panel:  mat(0xEEF2F9, {roughness:0.7}),
-  line:   mat(0xD5DCEA, {roughness:0.8}),
-  blue:   mat(C.blue, {roughness:0.35}),
-  blueLt: mat(new THREE.Color(C.blue).lerp(new THREE.Color(0xffffff), 0.72), {roughness:0.5}),
-  orange: mat(C.orange, {roughness:0.35}),
-  ink:    mat(C.ink, {roughness:0.4}),
+  crt:    mat('#5c5c50', {roughness:0.85}),
+  crtDk:  mat('#33332d', {roughness:0.9}),
+  key:    mat('#6c6c60', {roughness:0.8}),
+  bezel:  mat('#1c1c19', {roughness:0.6}),
+  paper:  mat(hex('--paper'), {roughness:0.65}),
+  paper2: mat('#E2E2DC', {roughness:0.7}),
+  line:   mat('#C9C9C3', {roughness:0.8}),
+  ink:    mat('#141414', {roughness:0.45}),
+  card:   mat('#1B1B1B', {roughness:0.55}),
+  card2:  mat('#242424', {roughness:0.55}),
+  dline:  mat('#3A3A38', {roughness:0.7}),
+  dline2: mat('#6E6E68', {roughness:0.7}),
+  lime:   mat(hex('--lime'), {roughness:0.35, emissive:lin(hex('--lime')), emissiveIntensity:0.18}),
+  limeDk: mat('#7E8F1F', {roughness:0.5}),
+  logo:   mat(hex('--lime'), {roughness:0.38, metalness:0.1, emissive:lin(hex('--lime')), emissiveIntensity:0.32, toneMapped:false}),
+  g1: mat('#262626'), g2: mat('#303030'), g3: mat('#3d3d3b'), g4: mat('#5d5d57'),
 };
 
 function rrShape(w, h, r){
@@ -162,134 +172,168 @@ function rbox(w, h, d, r, material, {pivot = 'center'} = {}){
   m.castShadow = true; m.receiveShadow = true;
   return m;
 }
-function extrude(shape, depth, material, bev = 0.02){
-  const g = new THREE.ExtrudeGeometry(shape, {depth, bevelEnabled:true, bevelThickness:bev, bevelSize:bev, bevelSegments:3, curveSegments:16});
-  const m = new THREE.Mesh(g, material);
-  m.castShadow = true; m.receiveShadow = true;
-  return m;
+const place = (m, x, y, z, parent) => { m.position.set(x, y, z); parent.add(m); return m; };
+
+/* ───────────── Scène 1: de ‘prima’ website – een oude CRT ───────────── */
+const S1 = new THREE.Group(); scene.add(S1);
+const crt = new THREE.Group(); S1.add(crt);
+place(rbox(2.5, 0.34, 2.2, 0.06, M.crt), 0, -1.27, 0, crt);                         // basiskast
+place(rbox(2.2, 1.95, 1.9, 0.1, M.crt), 0, -0.1, -0.15, crt);                      // monitor
+place(rbox(2.0, 1.4, 0.08, 0.06, M.bezel), 0, 0.12, 0.82, crt);                    // bezel
+const screenCanvas = document.createElement('canvas'); screenCanvas.width = 160; screenCanvas.height = 120;
+const sctx = screenCanvas.getContext('2d'), simg = sctx.createImageData(160, 120);
+const screenTex = new THREE.CanvasTexture(screenCanvas);
+screenTex.encoding = THREE.sRGBEncoding;
+const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.78, 1.2), new THREE.MeshBasicMaterial({map:screenTex, toneMapped:false}));
+place(screen, 0, 0.12, 0.87, crt);
+const screenGlow = new THREE.PointLight(0xe9ecdf, 0.9, 5, 2); place(screenGlow, 0, 0.12, 1.6, crt);
+for (let i = 0; i < 6; i++) place(rbox(0.9, 0.022, 0.03, 0.01, M.crtDk), -0.42, -0.72 + i*0.055, 0.8, crt);  // ventilatie
+for (let i = 0; i < 4; i++) place(rbox(0.018, 0.2, 0.03, 0.008, M.crtDk), 0.25 + i*0.045, -0.58, 0.8, crt);
+place(rbox(0.16, 0.16, 0.04, 0.02, M.bezel), 0.62, -0.58, 0.8, crt);
+const power = place(rbox(0.09, 0.09, 0.05, 0.015, M.lime), 0.62, -0.58, 0.83, crt);  // de enige limekleur: het knopje
+place(rbox(2.4, 0.16, 0.95, 0.05, M.crt), 0, -1.2, 1.45, crt).rotation.x = 0.06;    // toetsenbordplaat
+const keys = new THREE.InstancedMesh(new THREE.BoxGeometry(0.15, 0.06, 0.15), M.key, 52);
+keys.castShadow = true;
+{ const d = new THREE.Object3D(); let k = 0;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 13; c++){ d.position.set(-0.96 + c*0.16, -1.08 + r*0.012, 1.15 + r*0.18); d.rotation.x = 0.06; d.updateMatrix(); keys.setMatrixAt(k++, d.matrix); } }
+crt.add(keys);
+const scr = {glow:0.85, lime:0};
+let seed = 1;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const L = new THREE.Color(hex('--lime'));
+function drawScreen(frame){
+  seed = 1 + frame * 7919;
+  const d = simg.data;
+  for (let y = 0; y < 120; y++){
+    const scan = y % 2 ? 0.78 : 1;
+    for (let x = 0; x < 160; x++){
+      const v = (0.55 + rnd()*0.45) * scr.glow * scan, i = (y*160 + x)*4;
+      d[i]   = Math.min(255, 255*v*((1 - scr.lime) * 0.93 + scr.lime*L.r));
+      d[i+1] = Math.min(255, 255*v*((1 - scr.lime) * 0.94 + scr.lime*L.g));
+      d[i+2] = Math.min(255, 255*v*((1 - scr.lime) * 0.9  + scr.lime*L.b));
+      d[i+3] = 255;
+    }
+  }
+  sctx.putImageData(simg, 0, 0);
+  screenTex.needsUpdate = true;
+  screenGlow.color.setRGB(0.9 + scr.lime*(L.r - 0.9), 0.92 + scr.lime*(L.g - 0.92), 0.86 + scr.lime*(L.b - 0.86));
+  screenGlow.intensity = 0.9 * scr.glow;
 }
 
-/* ───────────────────────── Scène 1 + 2: de website ───────────────────────── */
-const S1 = new THREE.Group(); scene.add(S1);
-const page = new THREE.Group(); S1.add(page);
-const pageBase = rbox(2.7, 4.6, 0.14, 0.16, M.white); page.add(pageBase);
-
-// elementen: [mesh, x, y, laag voor exploded view]
+/* ───────────── Scène 2: de nieuwe website (zelfde plek, ‘achter’ het scherm) ───────────── */
+const S2 = new THREE.Group(); S2.visible = false; scene.add(S2);
+const page = new THREE.Group(); page.position.y = 0.1; page.scale.setScalar(0.62); S2.add(page);
+const pageBase = rbox(2.7, 4.4, 0.14, 0.16, M.paper); page.add(pageBase);
 const els = [];
-function el(mesh, x, y, layer){ mesh.position.set(x, y, 0.1); mesh.userData = {x, y, layer}; page.add(mesh); els.push(mesh); return mesh; }
-el(rbox(2.3, 0.2, 0.06, 0.1, M.panel), 0, 2.0, 1);              // nav
-el(rbox(0.2, 0.2, 0.08, 0.06, M.blue), -0.98, 2.0, 2);          // nav logo
-el(rbox(0.56, 0.08, 0.05, 0.04, M.line), 0.78, 2.0, 2);         // nav links
-el(rbox(2.3, 1.25, 0.08, 0.1, M.blue), 0, 1.13, 1);             // hero
-el(rbox(1.4, 0.13, 0.06, 0.06, M.white), -0.32, 1.3, 2);        // hero tekst
-el(rbox(0.95, 0.1, 0.06, 0.05, M.blueLt), -0.55, 1.07, 2);
-el(rbox(0.62, 0.2, 0.08, 0.1, M.orange), -0.72, 0.76, 3);       // hero knop
-el(rbox(1.9, 0.12, 0.05, 0.06, M.line), -0.2, 0.18, 2);         // koptekst
-el(rbox(1.4, 0.12, 0.05, 0.06, M.line), -0.45, -0.02, 2);
+function el(mesh, x, y, layer){ mesh.position.set(x, y, 0.1); mesh.userData = {layer}; page.add(mesh); els.push(mesh); return mesh; }
+el(rbox(2.3, 0.2, 0.06, 0.1, M.paper2), 0, 1.92, 1);
+el(rbox(0.5, 0.09, 0.07, 0.04, M.lime), -0.82, 1.92, 2);
+el(rbox(0.56, 0.08, 0.05, 0.04, M.line), 0.78, 1.92, 2);
+el(rbox(2.3, 1.3, 0.08, 0.1, M.ink), 0, 1.05, 1);                 // hero
+el(rbox(1.5, 0.14, 0.06, 0.07, M.paper), -0.28, 1.3, 2);
+el(rbox(1.0, 0.14, 0.06, 0.07, M.lime), -0.53, 1.07, 2);
+el(rbox(0.66, 0.22, 0.09, 0.11, M.lime), -0.7, 0.7, 3);           // CTA
+el(rbox(1.9, 0.12, 0.05, 0.06, M.line), -0.2, 0.1, 2);
+el(rbox(1.4, 0.12, 0.05, 0.06, M.line), -0.45, -0.1, 2);
 for (let i = 0; i < 3; i++){
   const x = -0.78 + i*0.78;
-  el(rbox(0.68, 0.98, 0.08, 0.08, M.panel), x, -0.75, 1);       // kaarten
-  el(rbox(0.3, 0.3, 0.07, 0.08, i === 1 ? M.orange : M.blue), x, -0.55, 2);
-  el(rbox(0.46, 0.07, 0.05, 0.035, M.line), x, -0.98, 2);
+  el(rbox(0.68, 0.98, 0.08, 0.08, M.paper2), x, -0.82, 1);
+  el(rbox(0.3, 0.3, 0.07, 0.08, i === 1 ? M.lime : M.ink), x, -0.62, 2);
+  el(rbox(0.46, 0.07, 0.05, 0.035, M.line), x, -1.05, 2);
 }
-el(rbox(2.3, 0.42, 0.06, 0.08, M.panel), 0, -1.78, 1);          // footer
-el(rbox(0.7, 0.08, 0.05, 0.04, M.line), -0.62, -1.78, 2);
+el(rbox(2.3, 0.36, 0.06, 0.08, M.ink), 0, -1.8, 1);
+el(rbox(0.6, 0.07, 0.05, 0.035, M.lime), -0.68, -1.8, 2);
 
-/* ───────────────────────── Scène 3: Google ───────────────────────── */
+/* ───────────── Scène 3: Google ───────────── */
 const S3X = 12;
-const S3 = new THREE.Group(); S3.position.x = S3X; scene.add(S3);
+const S3 = new THREE.Group(); S3.position.set(S3X, 0.15, 0); S3.scale.setScalar(0.7); scene.add(S3);
 const search = new THREE.Group(); search.position.set(0, 1.95, 0); S3.add(search);
-search.add(rbox(2.8, 0.44, 0.14, 0.22, M.white));
+search.add(rbox(2.8, 0.44, 0.14, 0.22, M.card2));
 const lens = new THREE.Group(); lens.position.set(-1.12, 0, 0.1);
-const ring = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.024, 12, 40), M.blue); ring.position.set(-0.02, 0.02, 0);
-const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.1, 12), M.blue);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.024, 12, 40), M.lime); ring.position.set(-0.02, 0.02, 0);
+const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.1, 12), M.lime);
 handle.position.set(0.07, -0.07, 0); handle.rotation.z = Math.PI/4;
 lens.add(ring, handle); search.add(lens);
-const typed = rbox(1.2, 0.09, 0.05, 0.045, M.line); typed.position.set(-0.3, 0, 0.09); search.add(typed);
-const caret = rbox(0.02, 0.16, 0.04, 0.01, M.blue); caret.position.set(0.34, 0, 0.09); search.add(caret);
-
-const SLOT = y => 1.15 - y*0.68;
+const typed = place(rbox(1.2, 0.09, 0.05, 0.045, M.dline2), -0.3, 0, 0.09, search);
+const caret = place(rbox(0.02, 0.16, 0.04, 0.01, M.lime), 0.34, 0, 0.09, search);
+const SLOT = i => 1.15 - i*0.68;
 const results = [];
-function result(highlight){
-  const g = new THREE.Group();
-  const base = rbox(2.8, 0.56, 0.12, 0.1, M.white); g.add(base);
-  const t = rbox(highlight ? 1.3 : 1.15, 0.09, 0.05, 0.045, highlight ? M.blue : M.blueLt); t.position.set(-1.2 + (highlight?1.3:1.15)/2, 0.11, 0.08); g.add(t);
-  const l1 = rbox(2.2, 0.06, 0.04, 0.03, M.line); l1.position.set(-0.1, -0.05, 0.08); g.add(l1);
-  const l2 = rbox(1.5, 0.06, 0.04, 0.03, M.line); l2.position.set(-0.45, -0.17, 0.08); g.add(l2);
-  if (highlight){
-    const stripe = rbox(0.07, 0.4, 0.06, 0.03, M.orange); stripe.position.set(-1.3, 0, 0.08); g.add(stripe);
-    const badge = new THREE.Group(); badge.position.set(1.2, 0.04, 0.12);
-    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.07, 40), M.orange); disc.rotation.x = Math.PI/2; disc.castShadow = true;
-    const star = new THREE.Shape(); // klein vinkje
-    star.moveTo(-0.07, 0.0); star.lineTo(-0.02, -0.05); star.lineTo(0.08, 0.06); star.lineTo(0.06, 0.08); star.lineTo(-0.02, -0.01); star.lineTo(-0.05, 0.02);
-    const tick = extrude(star, 0.02, M.white, 0.005); tick.position.z = 0.04;
+for (let i = 0; i < 5; i++){
+  const ours = i === 4, g = new THREE.Group();
+  g.add(rbox(2.8, 0.56, 0.12, 0.1, ours ? M.card2 : M.card));
+  const tw = ours ? 1.3 : 1.15;
+  place(rbox(tw, 0.09, 0.05, 0.045, ours ? M.lime : M.dline2), -1.2 + tw/2, 0.11, 0.08, g);
+  place(rbox(2.2, 0.06, 0.04, 0.03, M.dline), -0.1, -0.05, 0.08, g);
+  place(rbox(1.5, 0.06, 0.04, 0.03, M.dline), -0.45, -0.17, 0.08, g);
+  if (ours){
+    place(rbox(0.07, 0.4, 0.06, 0.03, M.lime), -1.3, 0, 0.08, g);
+    const badge = new THREE.Group(); badge.position.set(1.18, 0.02, 0.14);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.07, 40), M.lime); disc.rotation.x = Math.PI/2; disc.castShadow = true;
+    const ck = new THREE.Shape();
+    ck.moveTo(-0.075, 0.005); ck.lineTo(-0.02, -0.055); ck.lineTo(0.085, 0.055); ck.lineTo(0.06, 0.08); ck.lineTo(-0.02, -0.005); ck.lineTo(-0.05, 0.03);
+    const tick = new THREE.Mesh(new THREE.ExtrudeGeometry(ck, {depth:0.02, bevelEnabled:false}), M.ink); tick.position.z = 0.035;
     badge.add(disc, tick); badge.scale.setScalar(0.001); g.add(badge); g.userData.badge = badge;
   }
-  S3.add(g);
-  return g;
+  g.position.set(0, SLOT(i), 0); S3.add(g); results.push(g);
 }
-for (let i = 0; i < 5; i++){ const r = result(i === 4); r.position.set(0, SLOT(i), 0); results.push(r); }
-const hero3 = results[4];
+const ours = results[4];
 
-/* ───────────────────────── Scène 4: groei ───────────────────────── */
+/* ───────────── Scène 4: groei ───────────── */
 const S4X = 24;
-const S4 = new THREE.Group(); S4.position.x = S4X; scene.add(S4);
-const plate = rbox(3.0, 1.3, 0.12, 0.14, M.white); plate.rotation.x = -Math.PI/2; plate.position.set(0, -1.66, 0); S4.add(plate);
-const heights = [0.7, 1.15, 1.65, 2.25, 3.05];
-const bars = heights.map((h, i) => {
-  const b = rbox(0.38, h, 0.38, 0.06, i === 4 ? M.blue : (i === 3 ? M.blueLt : M.panel), {pivot:'bottom'});
-  b.position.set(-1.0 + i*0.5, -1.6, 0); b.scale.y = 0.001; S4.add(b); return b;
-});
-const arrowPts = [new THREE.Vector3(-1.25,-0.9,0.45), new THREE.Vector3(-0.5,-0.35,0.45), new THREE.Vector3(0.05,-0.55,0.45), new THREE.Vector3(0.6,0.35,0.45), new THREE.Vector3(1.15,1.75,0.45)];
-const curve = new THREE.CatmullRomCurve3(arrowPts, false, 'centripetal');
-const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.05, 14, false);
-const tube = new THREE.Mesh(tubeGeo, M.orange); tube.castShadow = true; S4.add(tube);
-const tubeCount = tubeGeo.index.count;
+const S4 = new THREE.Group(); S4.position.set(S4X, 0.1, 0); S4.scale.setScalar(0.85); scene.add(S4);
+place(rbox(3.0, 1.3, 0.12, 0.14, M.card), 0, -1.66, 0, S4).rotation.x = -Math.PI/2;
+const heights = [0.7, 1.15, 1.65, 2.25, 3.05], barMats = [M.g1, M.g2, M.g3, M.g4, M.paper];
+const bars = heights.map((h, i) => { const b = rbox(0.38, h, 0.38, 0.06, barMats[i], {pivot:'bottom'}); b.position.set(-1.0 + i*0.5, -1.6, 0); b.scale.y = 0.001; S4.add(b); return b; });
+const curve = new THREE.CatmullRomCurve3([[-1.25,-0.9],[-0.5,-0.35],[0.05,-0.55],[0.6,0.35],[1.15,1.75]].map(([x, y]) => new THREE.Vector3(x, y, 0.45)), false, 'centripetal');
+const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.05, 14, false), tubeCount = tubeGeo.index.count;
+const tube = new THREE.Mesh(tubeGeo, M.lime); tube.castShadow = true; S4.add(tube);
 const arrow = {v:0};
-const head = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.32, 32), M.orange);
-head.castShadow = true;
-const end = curve.getPoint(1), dir = curve.getTangent(1);
-head.position.copy(end).addScaledVector(dir, 0.1);
-head.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+const head = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.32, 32), M.lime); head.castShadow = true;
+const tipDir = curve.getTangent(1);
+head.position.copy(curve.getPoint(1)).addScaledVector(tipDir, 0.1);
+head.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tipDir);
 head.scale.setScalar(0.001); S4.add(head);
 
-/* ───────────────────────── Scène 5: logo ───────────────────────── */
-const S5X = 36;
-const S5 = new THREE.Group(); S5.position.x = S5X; scene.add(S5);
-const logo = new THREE.Group(); logo.position.set(0, 0.95, 0); S5.add(logo);
-const tile = rbox(2.0, 2.0, 0.42, 0.46, M.blue); logo.add(tile);
-// pagina met omgevouwen hoek
-const pw = 0.92, ph = 1.18, fold = 0.3;
-const pageShape = new THREE.Shape();
-pageShape.moveTo(-pw/2, -ph/2); pageShape.lineTo(pw/2, -ph/2); pageShape.lineTo(pw/2, ph/2 - fold);
-pageShape.lineTo(pw/2 - fold, ph/2); pageShape.lineTo(-pw/2, ph/2); pageShape.closePath();
-const logoPage = extrude(pageShape, 0.07, M.white, 0.025); logoPage.position.set(-0.08, -0.04, 0.22); logo.add(logoPage);
-const foldShape = new THREE.Shape();
-foldShape.moveTo(pw/2 - fold, ph/2); foldShape.lineTo(pw/2 - fold, ph/2 - fold); foldShape.lineTo(pw/2, ph/2 - fold); foldShape.closePath();
-const logoFold = extrude(foldShape, 0.05, M.blueLt, 0.012); logoFold.position.set(-0.08, -0.04, 0.3); logo.add(logoFold);
-// oranje 'boost'-pijl
-const a = new THREE.Shape();
-a.moveTo(-0.11, -0.34); a.lineTo(0.11, -0.34); a.lineTo(0.11, 0.02); a.lineTo(0.26, 0.02); a.lineTo(0, 0.34); a.lineTo(-0.26, 0.02); a.lineTo(-0.11, 0.02); a.closePath();
-const boost = extrude(a, 0.12, M.orange, 0.025); boost.position.set(0.42, -0.36, 0.3); logo.add(boost);
-logo.scale.setScalar(0.001);
+/* ───────────── Scène 5: het 3D-logo ───────────── */
+const S5X = 36, LOGO_W = 3.7;
+const S5 = new THREE.Group(); S5.position.set(S5X, 0.35, 0); scene.add(S5);
+const letters = LOGO.shapes.map(s => {
+  const toV = p => new THREE.Vector2(p[0]*LOGO_W, -p[1]*LOGO_W);
+  const shape = new THREE.Shape(s.o.map(toV));
+  s.h.forEach(h => shape.holes.push(new THREE.Path(h.map(toV))));
+  const g = new THREE.ExtrudeGeometry(shape, {depth:0.16, bevelEnabled:true, bevelThickness:0.025, bevelSize:0.012, bevelSegments:3, curveSegments:1});
+  g.computeBoundingBox();
+  const c = new THREE.Vector3(); g.boundingBox.getCenter(c); g.translate(-c.x, -c.y, -c.z);
+  const m = new THREE.Mesh(g, [M.logo, M.limeDk]);
+  m.castShadow = true;
+  m.position.set(c.x - LOGO_W/2, c.y + LOGO.aspect*LOGO_W/2, 0);
+  m.userData.home = m.position.clone();
+  S5.add(m);
+  return m;
+});
+// zachte lime gloed achter het logo
+const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(223,248,65,.5)'); r.addColorStop(0.45, 'rgba(223,248,65,.14)'); r.addColorStop(1, 'rgba(223,248,65,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+const glow = new THREE.Mesh(new THREE.PlaneGeometry(9, 4.5), new THREE.MeshBasicMaterial({map:glowTex, transparent:true, depthWrite:false, opacity:0, toneMapped:false}));
+glow.position.set(0, 0, -0.6); S5.add(glow);
 
-/* ───────────────────────── camera rig ───────────────────────── */
-const cam = {x:-0.6, y:0.6, z:13.5, tx:0, ty:0, tz:0, roll:0};
+/* ───────────── camera-rig (met lens-shift zodat de content boven de koppen valt) ───────────── */
+const cam = {x:-2.6, y:1.4, z:9.5, tx:0, ty:-0.1, tz:0, roll:0, shift:0.13};
+let vw = 1, vh = 1;
 function applyCamera(){
   camera.position.set(cam.x, cam.y, cam.z);
   camera.up.set(Math.sin(cam.roll), Math.cos(cam.roll), 0);
   camera.lookAt(cam.tx, cam.ty, cam.tz);
-  key.position.set(cam.tx + 4, cam.ty + 9, cam.tz + 7);
-  key.target.position.set(cam.tx, cam.ty, cam.tz);
+  camera.setViewOffset(vw, vh, 0, vh*cam.shift, vw, vh);
+  spot.position.set(cam.tx + 1.6, cam.ty + 7.5, cam.tz + 5.5);
+  spot.target.position.set(cam.tx, cam.ty, cam.tz);
+  fill.position.set(cam.tx - 6, cam.ty + 2, cam.tz + 3);
+  fill.target.position.set(cam.tx, cam.ty, cam.tz);
 }
 
-/* ───────────────────────── wordmark ───────────────────────── */
-const wm = document.getElementById('wordmark');
-wm.innerHTML = [...'pagebooster'].map(c => `<span class="ch">${c}</span>`).join('') +
-               [...'.nl'].map(c => `<span class="ch nl">${c}</span>`).join('');
-
-/* ───────────────────────── geluid (Web Audio, gesynthetiseerd) ───────────────────────── */
-let AC = null, out = null, verb = null;
+/* ───────────── geluid (Web Audio, gesynthetiseerd) ───────────── */
+let AC = null, out = null, verb = null, seeking = false;
 function initAudio(){
   if (AC) return;
   AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -297,33 +341,49 @@ function initAudio(){
   const comp = AC.createDynamicsCompressor(); out.connect(comp); comp.connect(AC.destination);
   verb = AC.createConvolver();
   const len = AC.sampleRate * 1.8, ir = AC.createBuffer(2, len, AC.sampleRate);
-  for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3.2); }
+  for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 3.2); }
   verb.buffer = ir;
-  const vg = AC.createGain(); vg.gain.value = 0.28; verb.connect(vg); vg.connect(out);
+  const vg = AC.createGain(); vg.gain.value = 0.25; verb.connect(vg); vg.connect(out);
 }
 const live = () => AC && !tl.paused() && !seeking;
-function noiseBuf(sec){ const b = AC.createBuffer(1, AC.sampleRate*sec, AC.sampleRate), d = b.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1; return b; }
+function noiseBuf(sec){ const b = AC.createBuffer(1, AC.sampleRate*sec, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; return b; }
 function env(g, t, peak, a, r){ g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + r); }
-function send(node){ node.connect(out); node.connect(verb); }
+function send(n){ n.connect(out); n.connect(verb); }
 const SFX = {
-  whoosh(dur = 0.45, f0 = 300, f1 = 2400, vol = 0.22){
+  whoosh(dur = 0.45, f0 = 300, f1 = 2400, vol = 0.2){
     if (!live()) return; const t = AC.currentTime;
     const src = AC.createBufferSource(); src.buffer = noiseBuf(dur + 0.1);
     const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
     bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur*0.7);
     const g = AC.createGain(); env(g, t, vol, dur*0.55, dur*0.45);
-    const p = AC.createStereoPanner ? AC.createStereoPanner() : null;
     src.connect(bp); bp.connect(g);
-    if (p){ p.pan.setValueAtTime(-0.4, t); p.pan.linearRampToValueAtTime(0.4, t + dur); g.connect(p); send(p); } else send(g);
+    if (AC.createStereoPanner){ const p = AC.createStereoPanner(); p.pan.setValueAtTime(-0.4, t); p.pan.linearRampToValueAtTime(0.4, t + dur); g.connect(p); send(p); } else send(g);
     src.start(t); src.stop(t + dur + 0.1);
   },
-  tick(freq = 1400, vol = 0.07){
+  static(dur = 1.3, vol = 0.045){            // CRT-ruis + brom
     if (!live()) return; const t = AC.currentTime;
-    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq*0.6, t + 0.06);
+    const src = AC.createBufferSource(); src.buffer = noiseBuf(dur);
+    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
+    const g = AC.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.15); g.gain.setValueAtTime(vol, t + dur - 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(hp); hp.connect(g); g.connect(out); src.start(t);
+    const o = AC.createOscillator(); o.frequency.value = 50; const og = AC.createGain();
+    og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.05, t + 0.2); og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(og); og.connect(out); o.start(t); o.stop(t + dur);
+  },
+  zap(vol = 0.12){                            // ‘power-on’ van de nieuwe site
+    if (!live()) return; const t = AC.currentTime;
+    const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(1800, t + 0.28);
+    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(600, t); lp.frequency.exponentialRampToValueAtTime(5000, t + 0.28);
+    const g = AC.createGain(); env(g, t, vol, 0.2, 0.15);
+    o.connect(lp); lp.connect(g); send(g); o.start(t); o.stop(t + 0.4);
+  },
+  tick(freq = 1400, vol = 0.06){
+    if (!live()) return; const t = AC.currentTime;
+    const o = AC.createOscillator(); o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq*0.6, t + 0.06);
     const g = AC.createGain(); env(g, t, vol, 0.003, 0.07);
     o.connect(g); send(g); o.start(t); o.stop(t + 0.1);
   },
-  pop(vol = 0.16){
+  pop(vol = 0.13){
     if (!live()) return; const t = AC.currentTime;
     [880, 1318.5].forEach((f, i) => {
       const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
@@ -331,142 +391,158 @@ const SFX = {
       o.connect(g); send(g); o.start(t + i*0.06); o.stop(t + i*0.06 + 0.45);
     });
   },
-  thump(vol = 0.4){
+  thump(vol = 0.35){
     if (!live()) return; const t = AC.currentTime;
-    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.3);
+    const o = AC.createOscillator(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.3);
     const g = AC.createGain(); env(g, t, vol, 0.005, 0.38);
     o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.45);
   },
-  chime(vol = 0.09){
+  chime(vol = 0.075){
     if (!live()) return; const t = AC.currentTime;
-    [523.25, 659.25, 783.99, 1046.5, 1567.98].forEach((f, i) => {
-      ['sine', 'triangle'].forEach((type, k) => {
-        const o = AC.createOscillator(); o.type = type; o.frequency.value = f * (k ? 1.002 : 1);
-        const g = AC.createGain(); env(g, t + i*0.055, vol*(k ? 0.35 : 1), 0.01, 1.6 - i*0.15);
-        o.connect(g); send(g); o.start(t + i*0.055); o.stop(t + 2);
-      });
-    });
+    [523.25, 659.25, 783.99, 1046.5, 1567.98].forEach((f, i) => ['sine', 'triangle'].forEach((type, k) => {
+      const o = AC.createOscillator(); o.type = type; o.frequency.value = f * (k ? 1.002 : 1);
+      const g = AC.createGain(); env(g, t + i*0.055, vol*(k ? 0.35 : 1), 0.01, 1.6 - i*0.15);
+      o.connect(g); send(g); o.start(t + i*0.055); o.stop(t + 2);
+    }));
   },
 };
 
-/* ───────────────────────── tijdlijn ───────────────────────── */
+/* ───────────── tijdlijn ───────────── */
 gsap.ticker.fps(FPS);
 const tl = gsap.timeline({paused:true, defaults:{ease:'power3.out'}});
-const q = s => document.querySelector(s);
-const prog = [...document.querySelectorAll('#progress i')];
+const ZERO = {x:0.001, y:0.001, z:0.001}, ONE = {x:1, y:1, z:1};
 
 function headIn(id, t){
   tl.fromTo(`${id} .kicker span`, {yPercent:110}, {yPercent:0, duration:0.4, ease:'expo.out'}, t)
-    .fromTo(`${id} .title span`, {yPercent:110}, {yPercent:0, duration:0.5, ease:'expo.out'}, t + 0.05);
+    .fromTo(`${id} .title span`, {yPercent:110}, {yPercent:0, duration:0.55, ease:'expo.out', stagger:0.06}, t + 0.04);
 }
 function headOut(id, t){
-  tl.to(`${id} .kicker span, ${id} .title span`, {yPercent:-110, duration:0.3, ease:'power3.in', stagger:0.03}, t);
+  tl.to(`${id} .kicker span, ${id} .title span`, {yPercent:-110, duration:0.28, ease:'power3.in', stagger:0.025}, t);
 }
+const counter = n => tl.to('#counter .num span', {yPercent:-100*n, duration:0.35, ease:'expo.inOut'}, '<');
 gsap.set('.head .kicker span, .head .title span', {yPercent:110});
-gsap.set('#wordmark .ch', {yPercent:120, opacity:0});
-gsap.set('#tagline', {opacity:0, y:20});
+gsap.set('#endline span', {yPercent:110});
+gsap.set('#endurl', {opacity:0, letterSpacing:'.6em'});
 
-// — Scène 1 (0 – 1.5): pagina vliegt in, elementen klikken op hun plek
-tl.call(() => SFX.whoosh(0.6, 200, 1600, 0.18), null, 0.02);
-tl.fromTo(page.position, {x:-1.2, y:-0.6, z:-5}, {x:0, y:0, z:0, duration:0.9, ease:'expo.out'}, 0)
-  .fromTo(page.rotation, {x:0.5, y:-1.1, z:0.12}, {x:0, y:0.18, z:0, duration:1.0, ease:'expo.out'}, 0)
-  .to(page.rotation, {y:-0.12, duration:0.6, ease:'sine.inOut'}, 0.95);
+// — Scène 1 (0 – 1.5): ‘prima’ – een stoffige CRT in het donker
+tl.call(() => SFX.static(1.4), null, 0.02);
+tl.fromTo(cam, {x:-3.4, y:1.8, z:12, tx:0, ty:-0.35, roll:-0.03}, {x:-1.7, y:0.9, z:8.8, ty:-0.3, roll:0, duration:1.3, ease:'power2.out'}, 0);
+tl.fromTo(crt.rotation, {y:0.55}, {y:0.32, duration:1.3, ease:'power2.out'}, 0);
+tl.fromTo(scr, {glow:0.15}, {glow:0.85, duration:0.5, ease:t => Math.min(1, t*1.3) * (0.7 + 0.3*Math.abs(Math.sin(t*37)))}, 0.05);
+tl.fromTo('#top', {opacity:0, y:-12}, {opacity:1, y:0, duration:0.5}, 0.15);
+headIn('#h1', 0.25);
+
+// — overgang: scherm springt op lime, camera duikt erin (1.15 – 1.6)
+tl.to(scr, {lime:1, glow:1.5, duration:0.25, ease:'power2.in'}, 1.12);
+tl.call(() => { SFX.zap(); SFX.whoosh(0.5, 200, 3000, 0.2); }, null, 1.15);
+tl.to(crt.rotation, {y:0, duration:0.42, ease:'power3.in'}, 1.13);
+tl.to(cam, {x:0, y:0.12, z:1.25, tx:0, ty:0.12, tz:0.8, duration:0.45, ease:'power3.in'}, 1.13);
+tl.to(cam, {shift:0, duration:0.4, ease:'power2.in'}, 1.15);
+headOut('#h1', 1.15);
+tl.fromTo('#flash', {opacity:0}, {opacity:1, duration:0.07, ease:'none'}, 1.53)
+  .to('#flash', {opacity:0, duration:0.22, ease:'power2.out'}, 1.6);
+tl.set(S1, {visible:false}, 1.58).set(S2, {visible:true}, 1.58);
+
+// — Scène 2 (1.6 – 2.7): de nieuwe site bouwt zich op en klapt open
+tl.set(cam, {x:0.1, y:0.3, z:2.6, tx:0, ty:0.15, tz:0}, 1.58);
+tl.to(cam, {x:1.0, y:0.55, z:8.2, ty:-0.15, shift:0.13, duration:0.6, ease:'expo.out'}, 1.6);
+tl.fromTo(page.rotation, {y:-0.25}, {y:-0.1, duration:0.6, ease:'expo.out'}, 1.6);
 els.forEach((m, i) => {
-  const t = 0.32 + i*0.034;
-  tl.fromTo(m.position, {z:1.8 + m.userData.layer*0.6}, {z:0.1, duration:0.45, ease:'back.out(1.6)'}, t)
-    .fromTo(m.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.35, ease:'back.out(1.8)'}, t);
-  if (i % 3 === 0) tl.call(() => SFX.tick(1000 + i*45, 0.05), null, t + 0.12);
+  const t = 1.66 + i*0.018;
+  tl.fromTo(m.position, {z:1.6 + m.userData.layer*0.5}, {z:0.1, duration:0.4, ease:'back.out(1.5)'}, t)
+    .fromTo(m.scale, ZERO, {...ONE, duration:0.3, ease:'back.out(1.8)'}, t);
+  if (i % 4 === 0) tl.call(() => SFX.tick(1100 + i*40, 0.045), null, t + 0.1);
 });
-tl.fromTo(cam, {x:-0.6, y:0.9, z:13.5, tx:0, ty:0.3, tz:0, roll:-0.05}, {x:0.7, y:0.6, z:9.6, ty:0.42, roll:0, duration:1.5, ease:'power2.out'}, 0);
-headIn('#h1', 0.3);
-tl.to(prog[0], {'--p':1, duration:1.5, ease:'none'}, 0);
+tl.call(() => SFX.whoosh(0.5, 120, 900, 0.17), null, 2.1);
+tl.to(cam, {x:5.4, y:2.4, z:5.9, tx:0, ty:-0.05, tz:0.6, roll:0.03, duration:0.65, ease:'power2.inOut'}, 2.12);
+els.forEach(m => tl.to(m.position, {z:0.1 + m.userData.layer*0.6, duration:0.5, ease:'power3.inOut'}, 2.15 + m.userData.layer*0.03));
+tl.to(pageBase.position, {z:-0.25, duration:0.5, ease:'power3.inOut'}, 2.15);
+headIn('#h2', 1.68); counter(1);
 
-// — Scène 2 (1.5 – 2.65): exploded view, camera draait eromheen
-tl.call(() => SFX.whoosh(0.55, 120, 900, 0.2), null, 1.42);
-headOut('#h1', 1.32);
-tl.to(cam, {x:5.6, y:2.6, z:6.0, tx:0, ty:0.5, tz:0.6, roll:0.03, duration:1.15, ease:'power2.inOut'}, 1.45);
-tl.to(page.rotation, {y:0.05, x:0, duration:1.0, ease:'power2.inOut'}, 1.5);
-els.forEach(m => tl.to(m.position, {z:0.1 + m.userData.layer*0.62, duration:0.7, ease:'power3.inOut'}, 1.55 + m.userData.layer*0.04));
-tl.to(pageBase.position, {z:-0.25, duration:0.7, ease:'power3.inOut'}, 1.55);
-headIn('#h2', 1.62);
-tl.to(prog[1], {'--p':1, duration:1.15, ease:'none'}, 1.5);
+// — overgang naar Scène 3 (2.6 – 3.1)
+headOut('#h2', 2.5);
+tl.call(() => SFX.whoosh(0.5, 400, 3200, 0.22), null, 2.6);
+tl.to(cam, {x:S3X + 0.7, y:1.1, z:8.6, tx:S3X, ty:0.25, tz:0, roll:-0.02, duration:0.55, ease:'expo.inOut'}, 2.62);
 
-// — overgang naar Scène 3 (2.55 – 3.05)
-headOut('#h2', 2.42);
-tl.call(() => SFX.whoosh(0.5, 400, 3200, 0.24), null, 2.52);
-tl.to(cam, {x:S3X + 0.7, y:0.9, z:8.8, tx:S3X, ty:0.55, tz:0, roll:-0.025, duration:0.55, ease:'expo.inOut'}, 2.55);
-tl.to(page.position, {x:-2.5, duration:0.55, ease:'expo.in'}, 2.55);
-
-// — Scène 3 (2.8 – 4.0): zoekresultaten, onze pagina klimt naar #1
-tl.fromTo(search.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.45, ease:'back.out(1.6)'}, 2.75);
-tl.fromTo(typed.scale, {x:0.001}, {x:1, duration:0.35, ease:'steps(8)'}, 2.95);
-tl.fromTo(typed.position, {x:-0.9}, {x:-0.3, duration:0.35, ease:'steps(8)'}, 2.95);
-tl.fromTo(caret.position, {x:-0.9}, {x:0.34, duration:0.35, ease:'steps(8)'}, 2.95);
+// — Scène 3 (2.85 – 4.0): onze pagina klimt naar #1
+tl.fromTo(search.scale, ZERO, {...ONE, duration:0.45, ease:'back.out(1.6)'}, 2.82);
+tl.fromTo(typed.scale, {x:0.001}, {x:1, duration:0.35, ease:'steps(8)'}, 3.0)
+  .fromTo(typed.position, {x:-0.9}, {x:-0.3, duration:0.35, ease:'steps(8)'}, 3.0)
+  .fromTo(caret.position, {x:-0.9}, {x:0.34, duration:0.35, ease:'steps(8)'}, 3.0);
 results.forEach((r, i) => {
-  const t = 2.8 + i*0.05;
+  const t = 2.86 + i*0.05;
   tl.fromTo(r.rotation, {x:-1.4}, {x:0, duration:0.5, ease:'expo.out'}, t)
     .fromTo(r.position, {z:-1.2, y:SLOT(i) - 0.4}, {z:0, y:SLOT(i), duration:0.5, ease:'expo.out'}, t)
-    .fromTo(r.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.35}, t);
-  tl.call(() => SFX.tick(1500 - i*90, 0.045), null, t + 0.05);
+    .fromTo(r.scale, ZERO, {...ONE, duration:0.35}, t);
+  tl.call(() => SFX.tick(1500 - i*90, 0.04), null, t + 0.05);
 });
-tl.call(() => SFX.whoosh(0.4, 600, 2600, 0.14), null, 3.18);
-tl.to(hero3.position, {z:0.7, duration:0.2, ease:'power2.out'}, 3.18)
-  .to(hero3.scale, {x:1.05, y:1.05, z:1.05, duration:0.2}, 3.18)
-  .to(hero3.position, {y:SLOT(0), duration:0.5, ease:'power3.inOut'}, 3.32);
-results.slice(0, 4).forEach((r, i) => tl.to(r.position, {y:SLOT(i + 1), duration:0.42, ease:'power3.inOut'}, 3.36 + (3 - i)*0.03));
-tl.to(hero3.position, {z:0.18, duration:0.25, ease:'back.out(2)'}, 3.8)
-  .to(hero3.userData.badge.scale, {x:1, y:1, z:1, duration:0.35, ease:'back.out(2.4)'}, 3.78)
-  .call(() => SFX.pop(0.13), null, 3.8);
-tl.to(cam, {x:S3X - 0.9, y:0.0, z:8.2, ty:0.6, roll:0.02, duration:1.0, ease:'sine.inOut'}, 3.05);
-headIn('#h3', 2.92);
-tl.to(prog[2], {'--p':1, duration:1.35, ease:'none'}, 2.65);
+tl.call(() => SFX.whoosh(0.4, 600, 2600, 0.13), null, 3.22);
+tl.to(ours.position, {z:0.7, duration:0.2, ease:'power2.out'}, 3.22)
+  .to(ours.scale, {x:1.05, y:1.05, z:1.05, duration:0.2}, 3.22)
+  .to(ours.position, {y:SLOT(0), duration:0.5, ease:'power3.inOut'}, 3.36);
+results.slice(0, 4).forEach((r, i) => tl.to(r.position, {y:SLOT(i + 1), duration:0.42, ease:'power3.inOut'}, 3.4 + (3 - i)*0.03));
+tl.to(ours.position, {z:0.18, duration:0.25, ease:'back.out(2)'}, 3.84)
+  .to(ours.userData.badge.scale, {...ONE, duration:0.35, ease:'back.out(2.4)'}, 3.82)
+  .call(() => SFX.pop(), null, 3.84);
+tl.to(cam, {x:S3X - 0.9, y:0.4, z:8.0, ty:0.3, roll:0.02, duration:1.0, ease:'sine.inOut'}, 3.1);
+headIn('#h3', 2.96); counter(2);
 
-// — overgang naar Scène 4 (3.95 – 4.4)
+// — overgang naar Scène 4 (3.98 – 4.45)
 headOut('#h3', 3.95);
-tl.call(() => SFX.whoosh(0.48, 350, 2800, 0.24), null, 3.95);
-tl.to(cam, {x:S4X - 2.9, y:1.3, z:7.8, tx:S4X, ty:0.4, tz:0, roll:0, duration:0.5, ease:'expo.inOut'}, 3.98);
+tl.call(() => SFX.whoosh(0.48, 350, 2800, 0.22), null, 3.98);
+tl.to(cam, {x:S4X - 2.9, y:1.4, z:8.0, tx:S4X, ty:-0.05, tz:0, roll:0, duration:0.5, ease:'expo.inOut'}, 4.0);
 
-// — Scène 4 (4.3 – 5.3): staafdiagram groeit + pijl omhoog
+// — Scène 4 (4.3 – 5.2): staven groeien, lime pijl schiet omhoog
 bars.forEach((b, i) => {
-  const t = 4.3 + i*0.07;
+  const t = 4.32 + i*0.07;
   tl.to(b.scale, {y:1, duration:0.6, ease:'expo.out'}, t);
-  tl.call(() => SFX.tick(700 + i*170, 0.06), null, t);
+  tl.call(() => SFX.tick(700 + i*170, 0.055), null, t);
 });
-tl.call(() => SFX.whoosh(0.6, 250, 4200, 0.13), null, 4.62);
+tl.call(() => SFX.whoosh(0.6, 250, 4200, 0.12), null, 4.62);
 tl.to(arrow, {v:1, duration:0.55, ease:'power2.inOut'}, 4.65);
-tl.to(head.scale, {x:1, y:1, z:1, duration:0.3, ease:'back.out(2.5)'}, 5.12);
-tl.to(cam, {x:S4X + 2.4, y:0.4, z:7.4, ty:0.5, duration:1.0, ease:'sine.inOut'}, 4.45);
-headIn('#h4', 4.3);
-tl.to(prog[3], {'--p':1, duration:1.25, ease:'none'}, 4.0);
+tl.to(head.scale, {...ONE, duration:0.3, ease:'back.out(2.5)'}, 5.1);
+tl.to(cam, {x:S4X + 2.3, y:0.5, z:7.6, ty:0.1, duration:1.0, ease:'sine.inOut'}, 4.45);
+headIn('#h4', 4.32); counter(3);
 
-// — overgang naar logo (5.2 – 5.7)
-headOut('#h4', 5.15);
-tl.to('#url, #progress', {opacity:0, y:10, duration:0.3, ease:'power2.in'}, 5.15);
-tl.call(() => SFX.whoosh(0.7, 150, 3600, 0.26), null, 5.2);
-tl.to(cam, {x:S5X, y:-0.6, z:10.5, tx:S5X, ty:0.15, tz:0, roll:0, duration:0.6, ease:'expo.inOut'}, 5.22);
-tl.fromTo('#flash', {opacity:0}, {opacity:0.55, duration:0.12, ease:'power2.in', yoyo:true, repeat:1}, 5.42);
+// — overgang naar het logo (5.15 – 5.75)
+headOut('#h4', 5.12);
+tl.to('#top', {opacity:0, y:-12, duration:0.3, ease:'power2.in'}, 5.12);
+tl.call(() => SFX.whoosh(0.7, 150, 3600, 0.24), null, 5.18);
+tl.to(cam, {x:S5X, y:0.2, z:12.5, tx:S5X, ty:0.3, tz:0, roll:0, shift:0.0, duration:0.6, ease:'expo.inOut'}, 5.2);
 
-// — Scène 5 (5.5 – 7.0): logo groot in beeld
-tl.fromTo(logo.scale, {x:0.001, y:0.001, z:0.001}, {x:1, y:1, z:1, duration:0.7, ease:'expo.out'}, 5.5)
-  .fromTo(logo.rotation, {y:-Math.PI*1.5, x:0.6}, {y:0, x:0, duration:0.85, ease:'expo.out'}, 5.5)
-  .fromTo(logo.position, {z:-3, y:0.4}, {z:0, y:0.95, duration:0.8, ease:'expo.out'}, 5.5)
-  .fromTo(boost.position, {y:-0.9}, {y:-0.36, duration:0.5, ease:'back.out(2.2)'}, 5.85)
-  .fromTo(logoPage.position, {z:0.8}, {z:0.22, duration:0.45, ease:'back.out(2)'}, 5.75)
-  .call(() => { SFX.thump(0.32); SFX.chime(0.08); }, null, 5.95);
-tl.to('#wordmark .ch', {yPercent:0, opacity:1, duration:0.55, ease:'expo.out', stagger:0.025}, 5.95);
-tl.to('#tagline', {opacity:1, y:0, duration:0.5, ease:'power2.out'}, 6.35);
-tl.to(cam, {z:8.4, y:-0.3, ty:0.2, duration:1.5, ease:'power2.out'}, 5.82);
-tl.to(logo.rotation, {y:0.08, x:-0.04, duration:1.05, ease:'sine.inOut'}, 6.35);
+// — Scène 5 (5.5 – 7.0): letters vliegen in, logo groot in beeld
+letters.forEach((m, i) => {
+  const t = 5.45 + i*0.035, h = m.userData.home;
+  tl.fromTo(m.position, {x:h.x + 0.6, y:h.y - 0.5, z:2.2}, {x:h.x, y:h.y, z:0, duration:0.6, ease:'expo.out'}, t)
+    .fromTo(m.rotation, {x:-1.3, y:0.5}, {x:0, y:0, duration:0.65, ease:'expo.out'}, t)
+    .fromTo(m.scale, ZERO, {...ONE, duration:0.4, ease:'power3.out'}, t);
+});
+tl.call(() => { SFX.thump(0.3); SFX.chime(); }, null, 5.9);
+tl.fromTo(S5.rotation, {y:-0.22, x:0.12}, {y:0.05, x:-0.03, duration:1.5, ease:'power2.out'}, 5.45);
+tl.fromTo(sheen.position, {x:S5X - 3, y:0.5, z:1.1}, {x:S5X + 3, duration:0.9, ease:'power2.inOut'}, 5.95)
+  .fromTo(sheen, {intensity:0}, {intensity:2, duration:0.3, yoyo:true, repeat:1, repeatDelay:0.3, ease:'sine.inOut'}, 5.95);
+tl.to(cam, {z:10.3, y:0.1, duration:1.5, ease:'power2.out'}, 5.8);
+tl.to(glow.material, {opacity:0.45, duration:0.8, ease:'power2.out'}, 5.85);
+tl.to('#endline span', {yPercent:0, duration:0.55, ease:'expo.out'}, 6.15);
+tl.to('#endurl', {opacity:1, letterSpacing:'.24em', duration:0.7, ease:'expo.out'}, 6.3);
 tl.set({}, {}, DURATION);
 
-/* ───────────────────────── render ───────────────────────── */
-let seeking = false;
+/* ───────────── render ───────────── */
 function resize(){
   const r = stage.getBoundingClientRect();
   renderer.setSize(r.width, r.height, false);
+  vw = r.width; vh = r.height;
 }
 addEventListener('resize', resize); resize();
-function draw(){ tubeGeo.setDrawRange(0, Math.floor(arrow.v * tubeCount / 6) * 6); applyCamera(); renderer.render(scene, camera); }
+const grain = document.getElementById('grain');
+function draw(){
+  const frame = Math.round(tl.time() * FPS);
+  if (S1.visible) drawScreen(frame);
+  grain.style.transform = `translate(${(frame*37) % 100 / 4 - 12}%, ${(frame*53) % 100 / 4 - 12}%)`;
+  tubeGeo.setDrawRange(0, Math.floor(arrow.v * tubeCount / 6) * 6);
+  applyCamera();
+  renderer.render(scene, camera);
+}
 gsap.ticker.add(draw);
 
 // Exportmodus voor frame-voor-frame capture (60 fps → 420 frames): window.renderFrame(n)
@@ -474,18 +550,11 @@ window.renderFrame = n => { seeking = true; tl.pause(); tl.seek(n / FPS, true); 
 window.TOTAL_FRAMES = DURATION * FPS;
 
 const play = document.getElementById('play');
-function start(){
-  initAudio(); AC.resume();
-  play.classList.add('hidden');
-  tl.restart();
-}
+function start(){ initAudio(); AC.resume(); play.classList.add('hidden'); tl.restart(); }
 play.addEventListener('click', start);
-tl.eventCallback('onComplete', () => {
-  setTimeout(() => { play.querySelector('small').textContent = 'OPNIEUW AFSPELEN'; play.classList.remove('hidden'); }, 900);
-});
-addEventListener('keydown', e => { if (e.code === 'Space' || e.key === 'r') { e.preventDefault(); start(); } });
+tl.eventCallback('onComplete', () => setTimeout(() => { play.querySelector('small').textContent = 'OPNIEUW AFSPELEN'; play.classList.remove('hidden'); }, 900));
+addEventListener('keydown', e => { if (e.code === 'Space' || e.key === 'r'){ e.preventDefault(); start(); } });
 
-// eerste frame tonen achter de play-knop
 window.renderFrame(0);
 })();
 </script>
