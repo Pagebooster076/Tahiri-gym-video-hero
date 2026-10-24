@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pagebooster Motion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,500;0,800;1,800&family=Inter:wght@500;800&display=swap" rel="stylesheet">
@@ -15,11 +15,13 @@
     --grey:#CACAC8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  :root{color-scheme:dark}
   html,body{height:100%;background:#000;overflow:hidden}
   body{display:flex;align-items:center;justify-content:center;font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
 
   /* 9:16 stage */
-  #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));overflow:hidden;background:var(--bg);container-type:size}
+  #stage{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));
+    height:min(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px),calc(100vw*16/9));overflow:hidden;background:var(--bg);container-type:size}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
   #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(100% 70% at 50% 55%,transparent 55%,rgba(0,0,0,.45) 100%)}
 
